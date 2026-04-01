@@ -1,0 +1,128 @@
+{
+  "2023": {
+    "minimum_wage": 3000.0,
+    "salariat": {
+      "cas_rate": 0.25,
+      "cass_rate": 0.1,
+      "income_tax_rate": 0.1
+    },
+    "pfa": {
+      "expense_ratio": 0.0,
+      "cas_rate": 0.25,
+      "income_tax_rate": 0.1,
+      "cas_thresholds": {
+        "lower_multiplier": 12,
+        "upper_multiplier": 24,
+        "lower_base_multiplier": 12,
+        "upper_base_multiplier": 24
+      },
+      "cass_rate": 0.1,
+      "cass_brackets": [
+        {
+          "max_income_multiplier": 6,
+          "base_multiplier": 0
+        },
+        {
+          "max_income_multiplier": 12,
+          "base_multiplier": 6
+        },
+        {
+          "max_income_multiplier": 24,
+          "base_multiplier": 12
+        },
+        {
+          "max_income_multiplier": 60,
+          "base_multiplier": 24
+        },
+        {
+          "max_income_multiplier": null,
+          "base_multiplier": 60
+        }
+      ]
+    }
+  },
+  "2024": {
+    "minimum_wage": 3300.0,
+    "salariat": {
+      "cas_rate": 0.25,
+      "cass_rate": 0.1,
+      "income_tax_rate": 0.1
+    },
+    "pfa": {
+      "expense_ratio": 0.0,
+      "cas_rate": 0.25,
+      "income_tax_rate": 0.1,
+      "cas_thresholds": {
+        "lower_multiplier": 12,
+        "upper_multiplier": 24,
+        "lower_base_multiplier": 12,
+        "upper_base_multiplier": 24
+      },
+      "cass_rate": 0.1,
+      "cass_brackets": [
+        {
+          "max_income_multiplier": 6,
+          "base_multiplier": 0
+        },
+        {
+          "max_income_multiplier": 12,
+          "base_multiplier": 6
+        },
+        {
+          "max_income_multiplier": 24,
+          "base_multiplier": 12
+        },
+        {
+          "max_income_multiplier": 60,
+          "base_multiplier": 24
+        },
+        {
+          "max_income_multiplier": null,
+          "base_multiplier": 60
+        }
+      ]
+    }
+  },
+  "2025": {
+    "minimum_wage": 3700.0,
+    "salariat": {
+      "cas_rate": 0.25,
+      "cass_rate": 0.1,
+      "income_tax_rate": 0.0
+    },
+    "pfa": {
+      "expense_ratio": 0.0,
+      "cas_rate": 0.25,
+      "income_tax_rate": 0.1,
+      "cas_thresholds": {
+        "lower_multiplier": 12,
+        "upper_multiplier": 24,
+        "lower_base_multiplier": 12,
+        "upper_base_multiplier": 24
+      },
+      "cass_rate": 0.1,
+      "cass_brackets": [
+        {
+          "max_income_multiplier": 6,
+          "base_multiplier": 0
+        },
+        {
+          "max_income_multiplier": 12,
+          "base_multiplier": 6
+        },
+        {
+          "max_income_multiplier": 24,
+          "base_multiplier": 12
+        },
+        {
+          "max_income_multiplier": 60,
+          "base_multiplier": 24
+        },
+        {
+          "max_income_multiplier": null,
+          "base_multiplier": 60
+        }
+      ]
+    }
+  }
+}
