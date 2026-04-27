@@ -76,9 +76,8 @@ pytest -v
 When this repository is hosted on GitHub, [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs only on **push to `master`** (for example after a pull request is merged). It does not run on other branches or on pull request events alone.
 
 - **What runs:** `pytest` only (the full test suite under `tests/`).
-- **What does not run:** mutation testing (`mutmut`) is **not** executed in CI. It is slower and more resource-heavy than unit tests, so we keep mutation analysis for local or WSL runs (see Technical Report — Environment and Execution). The workflow still installs dependencies from `requirements.txt` (which includes `mutmut` for a reproducible environment), but CI never invokes `mutmut run` or related mutation steps.
-- **Local mutation testing:** after `pip install -r requirements.txt`, configure and run `mutmut` as described in `setup.cfg` (paths and test directory).
-
+- **What does not run:** mutation testing (`mutmut`) is **not** executed in CI.
+  
 ## Technical Report
 
 ### Testing Scope
