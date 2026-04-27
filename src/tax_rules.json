@@ -1,7 +1,7 @@
 {
   "2023": {
     "minimum_wage": 3000.0,
-    "salariat": {
+    "employee": {
       "cas_rate": 0.25,
       "cass_rate": 0.1,
       "income_tax_rate": 0.1
@@ -43,7 +43,7 @@
   },
   "2024": {
     "minimum_wage": 3300.0,
-    "salariat": {
+    "employee": {
       "cas_rate": 0.25,
       "cass_rate": 0.1,
       "income_tax_rate": 0.1
@@ -85,7 +85,7 @@
   },
   "2025": {
     "minimum_wage": 3700.0,
-    "salariat": {
+    "employee": {
       "cas_rate": 0.25,
       "cass_rate": 0.1,
       "income_tax_rate": 0.0

@@ -3,10 +3,10 @@ from typing import Dict
 from calculator_base import TaxCalculator
 
 
-class SalariatCalculator(TaxCalculator):
+class EmployeeCalculator(TaxCalculator):
     def calculate(self) -> Dict[str, float]:
         # Rates are loaded from yearly config via TaxCalculator base class.
-        rules = self.rules["salariat"]
+        rules = self.rules["employee"]
         cas = self.venit_brut * rules["cas_rate"]
         cass = self.venit_brut * rules["cass_rate"]
         # Income tax for salary is applied after social contributions.

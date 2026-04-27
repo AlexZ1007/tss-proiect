@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, Tuple
 
 from calculator_pfa import PFACalculator
-from calculator_salariat import SalariatCalculator
+from calculator_employee import EmployeeCalculator
 
 
 def initialize_session_state(years: list[int]) -> None:
@@ -43,20 +43,20 @@ def apply_pending_load_request() -> None:
 
 
 def build_simulation(venit: float, an: int) -> Dict[str, Any]:
-    salariat = SalariatCalculator(venit, an).calculate()
+    employee = EmployeeCalculator(venit, an).calculate()
     pfa = PFACalculator(venit, an).calculate()
-    salariat_rate = (salariat["total_taxe"] / venit * 100) if venit else 0.0
+    employee_rate = (employee["total_taxe"] / venit * 100) if venit else 0.0
     pfa_rate = (pfa["total_taxe"] / venit * 100) if venit else 0.0
-    if salariat["venit_net"]:
-        net_diff_pct = ((pfa["venit_net"] - salariat["venit_net"]) / salariat["venit_net"]) * 100
+    if employee["venit_net"]:
+        net_diff_pct = ((pfa["venit_net"] - employee["venit_net"]) / employee["venit_net"]) * 100
     else:
         net_diff_pct = 0.0
     return {
         "venit_brut": float(venit),
         "anul_fiscal": int(an),
-        "salariat": salariat,
+        "employee": employee,
         "pfa": pfa,
-        "salariat_tax_rate": salariat_rate,
+        "employee_tax_rate": employee_rate,
         "pfa_tax_rate": pfa_rate,
         "net_diff_percent": net_diff_pct,
     }
@@ -160,9 +160,9 @@ def get_active_simulation_values() -> Dict[str, Any]:
     return {
         "venit_brut": active["venit_brut"],
         "anul_fiscal": active["anul_fiscal"],
-        "salariat_results": active["salariat"],
+        "employee_results": active["employee"],
         "pfa_results": active["pfa"],
-        "salariat_tax_rate": active["salariat_tax_rate"],
+        "employee_tax_rate": active["employee_tax_rate"],
         "pfa_tax_rate": active["pfa_tax_rate"],
         "net_diff_percent": active["net_diff_percent"],
     }

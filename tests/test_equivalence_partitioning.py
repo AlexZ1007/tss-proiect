@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from calculator_pfa import PFACalculator
-from calculator_salariat import SalariatCalculator
+from calculator_employee import EmployeeCalculator
 from tax_config import get_available_years
 
 
@@ -27,15 +27,15 @@ class TestEquivalencePartitioning:
     def test_venit_brut_invalid_negative(self):
         """Test invalid equivalence class: negative venit_brut"""
         with pytest.raises(ValueError, match="Income must be positive"):
-            SalariatCalculator(-1000, 2024)
+            EmployeeCalculator(-1000, 2024)
         with pytest.raises(ValueError, match="Income must be positive"):
             PFACalculator(-50000, 2024)
 
     def test_venit_brut_valid_zero(self):
         """Test valid equivalence class: zero venit_brut (edge case)"""
-        salariat = SalariatCalculator(0, 2024).calculate()
-        assert salariat["venit_net"] == 0.0
-        assert salariat["total_taxe"] == 0.0
+        employee = EmployeeCalculator(0, 2024).calculate()
+        assert employee["venit_net"] == 0.0
+        assert employee["total_taxe"] == 0.0
 
         pfa = PFACalculator(0, 2024).calculate()
         assert pfa["venit_net"] == 0.0
@@ -45,9 +45,9 @@ class TestEquivalencePartitioning:
         """Test valid equivalence class: small positive venit_brut"""
         # Small income, below minimum wage thresholds
         venit = 10000  # Less than 12 * 3300 = 39600 for 2024
-        salariat = SalariatCalculator(venit, 2024).calculate()
-        assert salariat["venit_net"] > 0
-        assert salariat["total_taxe"] > 0
+        employee = EmployeeCalculator(venit, 2024).calculate()
+        assert employee["venit_net"] > 0
+        assert employee["total_taxe"] > 0
 
         pfa = PFACalculator(venit, 2024).calculate()
         assert pfa["venit_net"] > 0
@@ -57,9 +57,9 @@ class TestEquivalencePartitioning:
         """Test valid equivalence class: large positive venit_brut"""
         # Large income, above all thresholds
         venit = 500000  # Much larger than 60 * 3300 = 198000
-        salariat = SalariatCalculator(venit, 2024).calculate()
-        assert salariat["venit_net"] > 0
-        assert salariat["total_taxe"] > 0
+        employee = EmployeeCalculator(venit, 2024).calculate()
+        assert employee["venit_net"] > 0
+        assert employee["total_taxe"] > 0
 
         pfa = PFACalculator(venit, 2024).calculate()
         assert pfa["venit_net"] > 0
@@ -68,7 +68,7 @@ class TestEquivalencePartitioning:
     def test_anul_fiscal_invalid_non_integer(self):
         """Test invalid equivalence class: non-integer anul_fiscal that cannot be converted"""
         with pytest.raises(ValueError):
-            SalariatCalculator(100000, "invalid_year")
+            EmployeeCalculator(100000, "invalid_year")
         with pytest.raises(ValueError):
             PFACalculator(100000, "2024abc")
 
@@ -76,15 +76,15 @@ class TestEquivalencePartitioning:
         """Test invalid equivalence class: year before minimum available"""
         min_year = min(get_available_years())
         with pytest.raises(ValueError, match=f"Minimum configured year is {min_year}"):
-            SalariatCalculator(100000, min_year - 1)
+            EmployeeCalculator(100000, min_year - 1)
         with pytest.raises(ValueError, match=f"Minimum configured year is {min_year}"):
             PFACalculator(100000, min_year - 1)
 
     def test_anul_fiscal_valid_exact_years(self):
         """Test valid equivalence class: exact available years"""
         for year in get_available_years():
-            salariat = SalariatCalculator(100000, year).calculate()
-            assert "venit_net" in salariat
+            employee = EmployeeCalculator(100000, year).calculate()
+            assert "venit_net" in employee
 
             pfa = PFACalculator(100000, year).calculate()
             assert "venit_net" in pfa
@@ -94,8 +94,8 @@ class TestEquivalencePartitioning:
         max_year = max(get_available_years())
         future_year = max_year + 5  # e.g., 2030
 
-        salariat = SalariatCalculator(100000, future_year).calculate()
-        assert "venit_net" in salariat
+        employee = EmployeeCalculator(100000, future_year).calculate()
+        assert "venit_net" in employee
 
         pfa = PFACalculator(100000, future_year).calculate()
         assert "venit_net" in pfa

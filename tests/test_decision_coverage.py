@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from calculator_pfa import PFACalculator
-from calculator_salariat import SalariatCalculator
+from calculator_employee import EmployeeCalculator
 from tax_config import get_rules_for_year, get_available_years
 
 
@@ -24,10 +24,10 @@ class TestDecisionCoverage:
         """
         # Branch True: venit_brut < 0
         with pytest.raises(ValueError, match="Income must be positive."):
-            SalariatCalculator(-1, 2024)
+            EmployeeCalculator(-1, 2024)
         
         # Branch False: venit_brut >= 0
-        calc = SalariatCalculator(0, 2024)
+        calc = EmployeeCalculator(0, 2024)
         assert calc.venit_brut == 0.0
 
     # Branches in PFACalculator._get_cas_base (calculator_pfa.py)
@@ -113,8 +113,8 @@ class TestDecisionCoverage:
         pfa_result = PFACalculator(0, 2024).calculate()
         assert pfa_result["venit_net_impozabil"] == 0.0
         
-        # Salariat: baza_impozabila = max(self.venit_brut - cas - cass, 0.0)
+        # Employee: baza_impozabila = max(self.venit_brut - cas - cass, 0.0)
         # Since cas_rate + cass_rate = 0.25 + 0.1 = 0.35, this is always positive for venit_brut > 0
         # But we can call it with 0
-        salariat_result = SalariatCalculator(0, 2024).calculate()
-        assert salariat_result["impozit"] == 0.0
+        employee_result = EmployeeCalculator(0, 2024).calculate()
+        assert employee_result["impozit"] == 0.0

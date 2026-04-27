@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from calculator_pfa import PFACalculator
-from calculator_salariat import SalariatCalculator
+from calculator_employee import EmployeeCalculator
 from tax_config import get_rules_for_year
 
 
@@ -72,9 +72,9 @@ class TestConditionCoverage:
         """
         # Condition True
         with pytest.raises(ValueError):
-            SalariatCalculator(-100, 2024)
+            EmployeeCalculator(-100, 2024)
         # Condition False
-        assert SalariatCalculator(100, 2024).venit_brut == 100.0
+        assert EmployeeCalculator(100, 2024).venit_brut == 100.0
 
     def test_tax_config_year_match_conditions(self):
         """

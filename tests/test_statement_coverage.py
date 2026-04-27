@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from calculator_pfa import PFACalculator
-from calculator_salariat import SalariatCalculator
+from calculator_employee import EmployeeCalculator
 from tax_config import get_available_years, get_rules_for_year, _load_rules_from_json
 
 
@@ -20,43 +20,43 @@ class TestStatementCoverage:
     # Coverage for calculator_base.py
     def test_calculator_base_init_valid(self):
         """Cover valid initialization path"""
-        calc = SalariatCalculator(100000, 2024)
+        calc = EmployeeCalculator(100000, 2024)
         assert calc.venit_brut == 100000.0
         assert calc.anul_fiscal == 2024
-        assert "salariat" in calc.rules
+        assert "employee" in calc.rules
 
     def test_calculator_base_init_negative_income(self):
         """Cover ValueError for negative income"""
         with pytest.raises(ValueError, match="Income must be positive"):
-            SalariatCalculator(-1000, 2024)
+            EmployeeCalculator(-1000, 2024)
 
     def test_calculator_base_init_zero_income(self):
         """Cover zero income (edge case)"""
-        calc = SalariatCalculator(0, 2024)
+        calc = EmployeeCalculator(0, 2024)
         assert calc.venit_brut == 0.0
 
-    # Coverage for calculator_salariat.py
-    def test_salariat_calculate_normal_case(self):
+    # Coverage for calculator_employee.py
+    def test_employee_calculate_normal_case(self):
         """Cover normal calculation path"""
-        calc = SalariatCalculator(100000, 2024)
+        calc = EmployeeCalculator(100000, 2024)
         result = calc.calculate()
         assert result["cas"] == 25000.0
         assert result["cass"] == 10000.0
         assert result["impozit"] == 6500.0
         assert result["venit_net"] == 58500.0
 
-    def test_salariat_calculate_zero_income(self):
+    def test_employee_calculate_zero_income(self):
         """Cover calculation with zero income"""
-        calc = SalariatCalculator(0, 2024)
+        calc = EmployeeCalculator(0, 2024)
         result = calc.calculate()
         assert result["cas"] == 0.0
         assert result["cass"] == 0.0
         assert result["impozit"] == 0.0
         assert result["venit_net"] == 0.0
 
-    def test_salariat_calculate_tax_free_year(self):
+    def test_employee_calculate_tax_free_year(self):
         """Cover calculation in tax-free year (2025+)"""
-        calc = SalariatCalculator(100000, 2025)
+        calc = EmployeeCalculator(100000, 2025)
         result = calc.calculate()
         assert result["cas"] == 25000.0
         assert result["cass"] == 10000.0
@@ -177,7 +177,7 @@ class TestStatementCoverage:
     def test_calculations_with_different_years(self):
         """Cover calculations with different configured years"""
         for year in [2023, 2024, 2025]:
-            salariat = SalariatCalculator(100000, year).calculate()
+            employee = EmployeeCalculator(100000, year).calculate()
             pfa = PFACalculator(100000, year).calculate()
-            assert "venit_net" in salariat
+            assert "venit_net" in employee
             assert "venit_net" in pfa

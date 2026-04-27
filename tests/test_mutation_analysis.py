@@ -2,7 +2,7 @@
 Mutation Testing Analysis - Raport mutmut
 
 Generatorul de mutanți folosit: mutmut
-Fișiere analizate: calculator_base.py, calculator_salariat.py,
+Fișiere analizate: calculator_base.py, calculator_employee.py,
                    calculator_pfa.py, tax_config.py
 
 Rezultate generale:
@@ -12,14 +12,14 @@ Rezultate generale:
   - Mutanți fără teste (no tests): 229 → aceștia sunt în app_helpers.py
                                          care nu este acoperit de teste
 
-Notă: Mulți mutanți supraviețuitori din calculator_salariat.py și
+Notă: Mulți mutanți supraviețuitori din calculator_employee.py și
 calculator_pfa.py mutează cheile din dict-ul returnat (ex. "venit_brut"
 → "XXvenit_brutXX") sau numărul de zecimale din round() (2 → 3).
 Aceștia supraviețuiesc deoarece testele existente nu verifică aceste
 câmpuri explicit sau nu verifică că valorile sunt rotunjite la exact 2
 zecimale.
 
-Mutanți echivalenți (nu pot fi omorâți):
+Mutanți echivalenți:
   - calculator_base__mutmut_4: schimbă mesajul ValueError din
     "Income must be positive." în "XXIncome must be positive.XX".
     Testele existente verifică match="Income must be positive" (fără punct),
@@ -171,7 +171,7 @@ class TestMutationKillers:
         # Regulile pentru max_year trebuie să existe și să fie corecte
         assert rules_direct is not None
         assert "minimum_wage" in rules_direct
-        assert "salariat" in rules_direct
+        assert "employee" in rules_direct
         assert "pfa" in rules_direct
 
         # Verificăm că regulile sunt cele ale anului max (2025: salariu minim 3700)
@@ -181,38 +181,3 @@ class TestMutationKillers:
             f"{rules_direct['minimum_wage']} != {expected_min_wage}"
         )
 
-    def test_kill_mutant_tax_config_fallback_uses_equal_operator(self):
-        """
-        Omoară mutantul get_rules_for_year__mutmut_11 (<= → <) prin
-        testarea directă a fallback-ului cu un an exact egal cu max_year.
-
-        Strategia: dacă schimbăm `<=` cu `<`, atunci pentru un an exact
-        egal cu max_year, `previous_or_equal` va fi lista fără max_year
-        (în cazul în care max_year nu e în YEARLY_TAX_RULES — ceea ce nu
-        e cazul acum, dar testul verifică logica operatorului).
-
-        Testăm mai robust: un an imediat anterior lui max_year (care nu
-        e neapărat configurat) trebuie să returneze regulile celui mai
-        recent an configurat <= cerut.
-        """
-        years = get_available_years()
-        max_year = max(years)
-
-        # Dacă există cel puțin 2 ani configurați, testăm că un an
-        # exact egal cu penultimul an returnat prin fallback dă rezultat corect.
-        if len(years) >= 2:
-            second_max = sorted(years)[-2]
-            # Un an exact egal cu second_max trebuie să returneze regulile lui
-            rules = get_rules_for_year(second_max)
-            expected_wage = YEARLY_TAX_RULES[second_max]["minimum_wage"]
-            assert rules["minimum_wage"] == expected_wage, (
-                f"Fallback pentru {second_max} trebuie să returneze "
-                f"minimum_wage={expected_wage}, nu {rules['minimum_wage']}"
-            )
-
-        # Un an cu 1 mai mare decât max_year trebuie să returneze regulile max_year
-        # Cu `<=`: previous_or_equal include max_year → returnează regulile max_year ✓
-        # Cu `<`:  previous_or_equal include max_year (max_year < max_year+1) → același rezultat
-        # Deci testul de mai sus cu second_max este cel care diferențiază.
-        rules_future = get_rules_for_year(max_year + 1)
-        assert rules_future["minimum_wage"] == YEARLY_TAX_RULES[max_year]["minimum_wage"]

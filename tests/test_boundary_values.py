@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from calculator_pfa import PFACalculator
-from calculator_salariat import SalariatCalculator
+from calculator_employee import EmployeeCalculator
 from tax_config import get_available_years
 
 
@@ -19,22 +19,22 @@ class TestBoundaryValueAnalysis:
     def test_venit_brut_boundary_negative(self):
         """Boundary: just below zero (invalid)"""
         with pytest.raises(ValueError):
-            SalariatCalculator(-0.01, 2024)
+            EmployeeCalculator(-0.01, 2024)
         with pytest.raises(ValueError):
             PFACalculator(-0.01, 2024)
 
     def test_venit_brut_boundary_zero(self):
         """Boundary: exactly zero"""
-        salariat = SalariatCalculator(0, 2024).calculate()
-        assert salariat["venit_net"] == 0.0
+        employee = EmployeeCalculator(0, 2024).calculate()
+        assert employee["venit_net"] == 0.0
 
         pfa = PFACalculator(0, 2024).calculate()
         assert pfa["venit_net"] == 0.0
 
     def test_venit_brut_boundary_just_above_zero(self):
         """Boundary: just above zero"""
-        salariat = SalariatCalculator(0.01, 2024).calculate()
-        assert salariat["venit_net"] > 0
+        employee = EmployeeCalculator(0.01, 2024).calculate()
+        assert employee["venit_net"] > 0
 
         pfa = PFACalculator(0.01, 2024).calculate()
         assert pfa["venit_net"] > 0
@@ -43,15 +43,15 @@ class TestBoundaryValueAnalysis:
         """Boundary: year just below minimum available"""
         min_year = min(get_available_years())
         with pytest.raises(ValueError):
-            SalariatCalculator(100000, min_year - 1)
+            EmployeeCalculator(100000, min_year - 1)
         with pytest.raises(ValueError):
             PFACalculator(100000, min_year - 1)
 
     def test_anul_fiscal_boundary_min_year(self):
         """Boundary: minimum available year"""
         min_year = min(get_available_years())
-        salariat = SalariatCalculator(100000, min_year).calculate()
-        assert "venit_net" in salariat
+        employee = EmployeeCalculator(100000, min_year).calculate()
+        assert "venit_net" in employee
 
         pfa = PFACalculator(100000, min_year).calculate()
         assert "venit_net" in pfa
@@ -59,8 +59,8 @@ class TestBoundaryValueAnalysis:
     def test_anul_fiscal_boundary_min_year_plus_one(self):
         """Boundary: year just above minimum available"""
         min_year = min(get_available_years())
-        salariat = SalariatCalculator(100000, min_year + 1).calculate()
-        assert "venit_net" in salariat
+        employee = EmployeeCalculator(100000, min_year + 1).calculate()
+        assert "venit_net" in employee
 
         pfa = PFACalculator(100000, min_year + 1).calculate()
         assert "venit_net" in pfa
@@ -68,8 +68,8 @@ class TestBoundaryValueAnalysis:
     def test_anul_fiscal_boundary_max_year_minus_one(self):
         """Boundary: year just below maximum available"""
         max_year = max(get_available_years())
-        salariat = SalariatCalculator(100000, max_year - 1).calculate()
-        assert "venit_net" in salariat
+        employee = EmployeeCalculator(100000, max_year - 1).calculate()
+        assert "venit_net" in employee
 
         pfa = PFACalculator(100000, max_year - 1).calculate()
         assert "venit_net" in pfa
@@ -77,8 +77,8 @@ class TestBoundaryValueAnalysis:
     def test_anul_fiscal_boundary_max_year(self):
         """Boundary: maximum available year"""
         max_year = max(get_available_years())
-        salariat = SalariatCalculator(100000, max_year).calculate()
-        assert "venit_net" in salariat
+        employee = EmployeeCalculator(100000, max_year).calculate()
+        assert "venit_net" in employee
 
         pfa = PFACalculator(100000, max_year).calculate()
         assert "venit_net" in pfa
@@ -86,8 +86,8 @@ class TestBoundaryValueAnalysis:
     def test_anul_fiscal_boundary_max_year_plus_one(self):
         """Boundary: year just above maximum available (fallback)"""
         max_year = max(get_available_years())
-        salariat = SalariatCalculator(100000, max_year + 1).calculate()
-        assert "venit_net" in salariat
+        employee = EmployeeCalculator(100000, max_year + 1).calculate()
+        assert "venit_net" in employee
 
         pfa = PFACalculator(100000, max_year + 1).calculate()
         assert "venit_net" in pfa
