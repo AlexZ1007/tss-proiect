@@ -14,6 +14,8 @@
     - [Streamlit vs Django](#streamlit-vs-django)
     - [Pytest vs Unittest](#pytest-vs-unittest)
 - [Diagrams](#diagrams)
+  - [Use case](#use-case-application-flow)
+  - [Pipeline](#development-and-testing-pipeline)
 - [AI-Assisted Testing Report](#ai-assisted-testing-report)
 
 ## Purpose of the Application
@@ -21,9 +23,8 @@ TaxVision RO helps users analyze Romanian income tax outcomes through a clear co
 
 Primary objectives:
 - Provide a clear history of comparisons so users can track and review previous simulations.
-- Export calculation results to Excel for reporting and further analysis.
+- Export calculation results to Excel and CSV for reporting and further analysis.
 - Offer graphical views of results to make differences easier to interpret.
-- Support educational and analytical use through reproducible, structured project outputs.
 
 ## Project Resources
 ### Presentation
@@ -152,5 +153,80 @@ Our conclusion: `unittest` is solid, but `pytest` matched our goals better for s
 
 ## Diagrams
 
+
+### Use case (application flow)
+
+High-level flow from user input through calculators to the frontend and optional export.
+
+![Use case diagram](diagrams/useCase.png)
+
+### Development and testing pipeline
+
+Local development, testing strategies, and GitHub flow through Actions on `master`.
+
+![Development and testing pipeline](diagrams/pipeline.png)
+
 ## AI-Assisted Testing Report
 
+
+### Tools and roles
+
+| Tool | Role |
+|------|------|
+| **Google Gemini** | Early brainstorming about the application idea and how to apply testing strategies. |
+| **Gemini and Cursor** | Drafting and refining automated tests (`pytest`), including structure, assertions, and edge cases aligned with `src/` calculators and `src/tax_rules.json`. |
+| **Cursor (feedback loop)** | After a full test module was written, we used the chat to cross-check coverage—for example, by walking through `TestEquivalencePartitioning` in `tests/test_equivalence_partitioning.py` to confirm invalid/valid partitions for `venit_brut` and `anul_fiscal` were represented and that both `EmployeeCalculator` and `PFACalculator` stayed in sync. |
+| **Cursor** | Building and iterating the Streamlit UI in `src/app.py` (layout, inputs, comparison flow, exports) while keeping business logic in calculators and tests separate from presentation. |
+
+### Workflow example
+
+In **`tests/test_boundary_values.py`** we first wrote **employee** boundary cases by hand, then used this prompt to add **PFA** to the same tests: “Here is `test_venit_brut_boundary_zero` for `EmployeeCalculator` only. Add matching `PFACalculator` calls and assertions in the same test, same year, without changing pytest style.”
+
+```19:40:tests/test_boundary_values.py
+    def test_venit_brut_boundary_negative(self):
+        """Boundary: just below zero (invalid)"""
+        with pytest.raises(ValueError):
+            EmployeeCalculator(-0.01, 2024)
+        with pytest.raises(ValueError):
+            PFACalculator(-0.01, 2024)
+
+    def test_venit_brut_boundary_zero(self):
+        """Boundary: exactly zero"""
+        employee = EmployeeCalculator(0, 2024).calculate()
+        assert employee["venit_net"] == 0.0
+
+        pfa = PFACalculator(0, 2024).calculate()
+        assert pfa["venit_net"] == 0.0
+
+    def test_venit_brut_boundary_just_above_zero(self):
+        """Boundary: just above zero"""
+        employee = EmployeeCalculator(0.01, 2024).calculate()
+        assert employee["venit_net"] > 0
+
+        pfa = PFACalculator(0.01, 2024).calculate()
+        assert pfa["venit_net"] > 0
+```
+
+### Example of prompts used
+
+
+**Streamlit UI (Cursor)**
+
+- **Prompt:** “Add a sidebar fiscal year selector and wire it to both calculators without moving tax math out of `src/` calculators.”
+
+**Coverage review (Cursor)**
+
+- **Prompt:** In `tests/test_equivalence_partitioning.py`, list every equivalence class we claim in the docstring and show which test method covers it for employee vs PFA. Flag gaps.
+
+**Mutation testing with mutmut (Cursor / Gemini)**
+
+- **Prompt:** “We run mutation testing with mutmut on the calculator code under `src/`. Walk through how to install and run it (`mutmut run`, then `mutmut results` / `mutmut show <id>` if needed). Then break down the report: how many mutants, killed vs survived vs no tests, what those buckets mean for our repo, a few interesting survivors, and which look equivalent vs worth a new test.”
+
+### Limitations and how we used AI safely
+
+- AI suggestions were always checked against **`src/tax_rules.json`** and running **`pytest`**; incorrect rates or thresholds were caught by tests or manual spot checks.
+- We treated AI output as **draft code**: naming, imports, and assertions were aligned with the rest of the repo before merging.
+
+### Summary
+
+Gemini helped frame the problem and test matrix; Gemini and Cursor accelerated writing and extending suites such as **`tests/test_boundary_values.py`** and **`tests/test_equivalence_partitioning.py`**; Cursor closed the loop on coverage and delivered the Streamlit front end.

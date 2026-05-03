@@ -1,0 +1,63 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="GpIEv1Y04hkSmI8X-KOb">
+    <mxGraphModel dx="975" dy="536" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lBSKcP26xONbZVdjMYf5-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="240" width="180" x="270" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-7" edge="1" parent="1" source="lBSKcP26xONbZVdjMYf5-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lBSKcP26xONbZVdjMYf5-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-9" connectable="0" parent="lBSKcP26xONbZVdjMYf5-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Input &lt;b&gt;year &lt;/b&gt;and&lt;br&gt;&lt;b&gt;income&amp;nbsp;&lt;/b&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.25" y="1" as="geometry">
+            <mxPoint x="9" y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;USER&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;PFA CALCULATOR&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="300" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-22" edge="1" parent="1" source="lBSKcP26xONbZVdjMYf5-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.667;entryDx=0;entryDy=0;entryPerimeter=0;" target="lBSKcP26xONbZVdjMYf5-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-23" connectable="0" parent="lBSKcP26xONbZVdjMYf5-22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="JSON Data" vertex="1">
+          <mxGeometry relative="1" x="0.4958" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;EMPLOYEE CALCULATOR&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="300" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-18" edge="1" parent="1" source="lBSKcP26xONbZVdjMYf5-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="lBSKcP26xONbZVdjMYf5-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-19" connectable="0" parent="lBSKcP26xONbZVdjMYf5-18" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="optional" vertex="1">
+          <mxGeometry relative="1" x="-0.0476" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;FRONTEND&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;EXCEL / CSV EXPORT&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;CALCULATORS&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="330" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-20" edge="1" parent="1" source="lBSKcP26xONbZVdjMYf5-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="lBSKcP26xONbZVdjMYf5-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lBSKcP26xONbZVdjMYf5-21" connectable="0" parent="lBSKcP26xONbZVdjMYf5-20" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="JSON Data" vertex="1">
+          <mxGeometry relative="1" x="0.45" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
