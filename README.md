@@ -94,9 +94,12 @@ Excluded from testing scope:
 The implemented testing strategies are covered through dedicated test modules.
 
 #### Basis path
+Tests all linearly independent paths through the control flow graph, ensuring every unique execution sequence is covered.
 #### Boundary value
 #### Condition coverage
+Validates that each individual condition in compound boolean expressions evaluates to both True and False independently.
 #### Decision coverage
+Ensures that every branch of every decision point (e.g., if/else blocks) is executed at least once.
 #### Equivalence partitioning
 #### Statement coverage
 #### Mutation testing
