@@ -1,0 +1,41 @@
+graph TD
+    
+    Start([Start: PFACalculator Execution]) --> Init[PFACalculator.__init__]
+    
+    subgraph "1. Initialization Basis (calculator_base.py)"
+        Init --> D_Income{venit_brut < 0?}
+        D_Income -- "True" --> ERR_Income[Raise ValueError]
+        D_Income -- "False" --> Config[Load Config: get_rules_for_year]
+    end
+
+    subgraph "2. Configuration Basis (tax_config.py)"
+        Config --> D_Match{Year in rules?}
+        D_Match -- "Yes" --> Rule_Match[Return Exact Year]
+        D_Match -- "No" --> D_Prev{Previous Year?}
+        D_Prev -- "Yes" --> Rule_Fallback[Return Fallback]
+        D_Prev -- "No" --> ERR_Config[Raise ValueError]
+    end
+
+    Rule_Match --> Calc[PFACalculator.calculate]
+    Rule_Fallback --> Calc
+
+    subgraph "3. Calculation Basis (calculator_pfa.py)"
+        Calc --> CAS[PFACalculator._get_cas_base]
+        CAS --> D_Low{Income < lower?}
+        D_Low -- "Path 1" --> R1[Return 0.0]
+        D_Low -- "False" --> D_High{Income < upper?}
+        D_High -- "Path 2" --> R2[Return lower_base]
+        D_High -- "Path 3" --> R3[Return upper_base]
+    end
+
+    R1 --> Final[Standardized Result Output]
+    R2 --> Final
+    R3 --> Final
+    Final --> End([End])
+
+    %% Styling for basis path targets
+    style D_Income fill:#fff4dd,stroke:#d4a017
+    style D_Match fill:#fff4dd,stroke:#d4a017
+    style D_Low fill:#fff4dd,stroke:#d4a017
+    style ERR_Income fill:#ffcccc
+    style ERR_Config fill:#ffcccc

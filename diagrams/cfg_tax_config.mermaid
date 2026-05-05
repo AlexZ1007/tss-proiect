@@ -1,0 +1,14 @@
+graph TD
+    Start([Start: get_rules_for_year]) --> D1{Year exists in rules?}
+    
+    D1 -- "Path 1 (Yes)" --> R1[Return rules for year]
+    D1 -- "No" --> D2{Is there a previous year?}
+    
+    D2 -- "Path 2 (Yes)" --> R2[Return fallback rules]
+    D2 -- "Path 3 (No)" --> R3[Raise ValueError]
+    
+    R1 --> End([End])
+    R2 --> End
+    R3 --> End
+
+    style R3 fill:#f66,stroke:#333

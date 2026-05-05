@@ -94,7 +94,12 @@ Excluded from testing scope:
 The implemented testing strategies are covered through dedicated test modules.
 
 #### Basis path
-Tests all linearly independent paths through the control flow graph, ensuring every unique execution sequence is covered.
+Tests all linearly independent paths through the control flow graph, ensuring every unique execution sequence is covered. Paths were identified by mapping the source code logic into CFGs and ensuring each test case introduces at least one new edge. The core calculation logic (e.g., `_get_cas_base`) has a Cyclomatic Complexity of **V(G) = 3** because it contains 2 decision nodes ($V(G) = P + 1$), requiring exactly 3 independent paths for complete coverage.
+
+- [CFG: CAS Base Calculation](diagrams/cfg_cas_base_test.png)
+- [CFG: Tax Config Retrieval](diagrams/cfg_tax_config_base_test.png)
+- [CFG: Initialization Validation](diagrams/cfg_init_validation_base_test.png)
+- [CFG: Project Basis Path](diagrams/cfg_PFACalculator.png)
 #### Boundary value
 #### Condition coverage
 Validates that each individual condition in compound boolean expressions evaluates to both True and False independently.

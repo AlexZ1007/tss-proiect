@@ -1,0 +1,10 @@
+graph TD
+    Start([Start: __init__]) --> D1{Income < 0?}
+    
+    D1 -- "Path 1 (True)" --> R1[Raise ValueError]
+    D1 -- "Path 2 (False)" --> R2[Initialize venit_brut]
+    
+    R1 --> End([End])
+    R2 --> End
+
+    style R1 fill:#f66,stroke:#333

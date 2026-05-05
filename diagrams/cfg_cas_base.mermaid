@@ -1,0 +1,18 @@
+graph TD
+      A([Start:
+      _get_cas_base]) -->
+      B{income < lower_threshold}
+        
+        B -- True --> C[Return
+      0.0]
+        B -- False --> D{income
+      < upper_threshold}
+        
+        D -- True --> E[Return
+      lower_base]
+        D -- False --> F[Return
+      upper_base]
+        
+       C --> G([End])
+       E --> G
+       F --> G
