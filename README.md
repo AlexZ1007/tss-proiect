@@ -82,9 +82,10 @@ When this repository is hosted on GitHub, [`.github/workflows/ci.yml`](.github/w
 ## Technical Report
 
 ### Testing Scope
-The testing scope includes only the business-logic layer:
+The testing scope includes mainly the business-logic layer:
 - `calculator_pfa` (derived from `calculator_base`)
 - `calculator_employee` (derived from `calculator_base`)
+- `run_simulation(venit_brut, anul_fiscal, user_triggered)` - helper function used to run the simulation and update the session state.
 
 Excluded from testing scope:
 - Frontend/display concerns
