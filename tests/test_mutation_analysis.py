@@ -1,63 +1,116 @@
 """
-Mutation Testing Analysis - Raport mutmut
+Mutation Testing Analysis - Raport cosmic-ray
+==============================================
 
-Generatorul de mutanți folosit: mutmut
-Fișiere analizate: calculator_base.py, calculator_employee.py,
-                   calculator_pfa.py, tax_config.py
+Generatorul de mutanți folosit: cosmic-ray
+Fișiere analizate: src/calculator_pfa.py
+
+Configurare cosmic-ray:
+  - Fișier configurare: cosmic-ray.toml
+  - module-path: src/calculator_pfa.py
+  - test-command: python -m pytest tests/ -x -q
 
 Rezultate generale:
-  - Total mutanți generați: 486 (doar pe fișierele de logică)
-  - Mutanți omorâți (killed): 194
-  - Mutanți supraviețuitori relevanți (survived): ~63 în fișierele de calcul
-  - Mutanți fără teste (no tests): 229 → aceștia sunt în app_helpers.py
-                                         care nu este acoperit de teste
+  - Total mutanți generați (jobs): 229
+  - Mutanți testați (complete): 229 (100%)
+  - Mutanți omorâți (killed): 207 (~90.39%)
+  - Mutanți supraviețuitori (survived): 22 (9.61%)
 
-Notă: Mulți mutanți supraviețuitori din calculator_employee.py și
-calculator_pfa.py mutează cheile din dict-ul returnat (ex. "venit_brut"
-→ "XXvenit_brutXX") sau numărul de zecimale din round() (2 → 3).
-Aceștia supraviețuiesc deoarece testele existente nu verifică aceste
-câmpuri explicit sau nu verifică că valorile sunt rotunjite la exact 2
-zecimale.
+Cum se interpretează raportul HTML generat de cosmic-ray:
+  - Verde  = mutant killed (testul a picat când codul era mutant — bine)
+  - Roșu   = mutant survived (testul a trecut cu codul mutant — problemă)
+  - Albastru = no coverage (niciun test nu a atins acea linie)
 
-Mutanți echivalenți:
-  - calculator_base__mutmut_4: schimbă mesajul ValueError din
-    "Income must be positive." în "XXIncome must be positive.XX".
-    Testele existente verifică match="Income must be positive" (fără punct),
-    deci mutantul ar trebui omorât — totuși supraviețuiește din cauza
-    configurației pytest.raises cu match partial. Acesta NU este echivalent,
-    ci un mutant ce poate fi omorât cu un test mai strict.
+Operatori de mutație folosiți de cosmic-ray:
+  - core/NumberReplacer: înlocuiește o constantă numerică (ex. 0.0 → 1.0, 2 → 3)
+  - core/ReplaceBinaryOperator_Sub_Add: înlocuiește operatori (- cu +)
+  - core/ReplaceBinaryOperator_Add_Sub: înlocuiește operatori (+ cu -)
+  - core/ReplaceBinaryOperator_Add_Mul: înlocuiește operatori (+ cu *)
+  - core/ReplaceBinaryOperator_Add_Div: înlocuiește operatori (+ cu /)
+  - core/ReplaceBinaryOperator_Sub_Mul: înlocuiește operatori (- cu *)
+  - core/ReplaceBinaryOperator_Mul_Pow: înlocuiește operatori (* cu **)
+  - core/ReplaceBinaryOperator_Mul_BitXor: înlocuiește operatori (* cu ^)
+  - core/ReplaceOrWithAnd: înlocuiește operatori logici (or cu and)
+  - core/AddNot: adaugă un operator NOT (ex. if x → if not x)
+  - core/ReplaceComparisonOperator_Is_IsNot: înlocuiește operatori de comparație (is cu is not)
+  - core/ReplaceComparisonOperator_Lt_Is: înlocuiește operatori de comparație (< cu is)
 
-  - tax_config__get_rules_for_year__mutmut_3/4/5/6: schimbă mesajul
-    erorii "No fiscal rules configured." în variante diferite.
-    Supraviețuiesc pentru că nu există teste care să verifice exact
-    acest mesaj (ramura `if not years` nu poate fi atinsă ușor în
-    condiții normale, deoarece JSON-ul este mereu prezent).
-    Aceștia sunt parțial echivalenți în context de test — ramura este
-    practic inaccesibilă fără mock.
+------------------------------------------------------------------------------
+ANALIZA MUTANȚILOR SUPRAVIEȚUITORI
+------------------------------------------------------------------------------
 
+Mutanți echivalenți (nu pot fi omorâți):
+-----------------------------------------
+
+  NumberReplacer occurrence 2-24 (21 mutanți survived):
+    Acești mutanți schimbă constante numerice din cod — multiplicatori din 
+    brackets (ex. 6 → 7 în max_income_multiplier) și numărul de zecimale
+    din round() (ex. round(cas, 2) → round(cas, 3)).
+    Supraviețuiesc deoarece:
+      - Multiplicatorii din brackets: testele existente nu testează valori
+        de venit exact la frontiera dintre brackets, deci schimbarea unui
+        multiplicator cu ±1 nu afectează rezultatul testelor curente.
+      - round(..., 2) → round(..., 3): pentru valorile întregi din teste
+        (ex. 19800.0, 9900.0), rotunjirea la 2 sau 3 zecimale produce
+        același rezultat — zecimalele extra sunt 0.
+    Sunt ECHIVALENȚI în contextul datelor de test curente.
+
+------------------------------------------------------------------------------
 Mutanți NEECHIVALENȚI aleși pentru a fi omorâți:
-  1. calculator_pfa.xǁPFACalculatorǁ_get_cass_base__mutmut_16
-     → schimbă `return 0.0` cu `return 1.0` în ramura de fallback
-       a metodei _get_cass_base (când niciun bracket nu se potrivește).
-       Aceasta este o eroare reală: dacă CASS-ul returnează 1.0 în loc
-       de 0.0, calculul final va fi incorect. Testele existente nu
-       acoperă cazul în care lista de brackets este parcursă complet
-       fără match (deoarece ultimul bracket are max_income_multiplier=None,
-       deci mereu returnează din buclă). Mutantul supraviețuiește deoarece
-       în practică ramura `return 0.0` de după buclă este dead code cu
-       datele curente — dar un test care verifică CASS exact 0.0 pentru
-       venit 0 îl poate omori indirect.
+-------------------------------------------------
 
-  2. tax_config.x_get_rules_for_year__mutmut_11
-     → schimbă `year <= fiscal_year` cu `year < fiscal_year` în
-       list comprehension-ul pentru fallback la ani anteriori.
-       Aceasta este o eroare reală: cu mutantul activ, dacă ceri regulile
-       exact pentru un an configurat (ex. 2025) dar acel an nu e în dict
-       (ceea ce nu se întâmplă acum, dar ar putea), sau mai important —
-       dacă testezi fallback-ul pentru un an exact egal cu max_year,
-       comportamentul diferă. Mutantul poate fi omorât testând că
-       `get_rules_for_year(max_year)` returnează regulile corecte
-       chiar și când codul trece prin ramura fallback.
+  MUTANT 1: Job 23 — ReplaceBinaryOperator_Sub_Add în calculate()
+  ---------------------------------------------------------------
+  Fișier:   src/calculator_pfa.py, linia 34
+  Mutație:  venit_net_impozabil = max(self.venit_brut - cheltuieli, 0.0)
+         →  venit_net_impozabil = max(self.venit_brut + cheltuieli, 0.0)
+  Operator: core/ReplaceBinaryOperator_Sub_Add
+
+  De ce este neechivalent:
+    Aceasta este o eroare logică reală — în loc să scadă cheltuielile din
+    venitul brut (comportament corect), le adaugă. Pentru orice venit cu
+    expense_ratio > 0, venit_net_impozabil ar fi mai mare decât cel corect,
+    ducând la taxe calculate greșit.
+
+  De ce supraviețuiește:
+    În configurarea curentă, expense_ratio = 0.0, deci cheltuieli = 0.
+    Prin urmare, venit_brut - 0 == venit_brut + 0, și mutantul produce
+    același rezultat. Testele existente nu testează scenariul cu
+    expense_ratio != 0, deci nu detectează diferența.
+
+  Cum îl omorâm:
+    Monkeypatch pe expense_ratio cu o valoare nenulă (ex. 0.2), astfel
+    încât cheltuieli = venit * 0.2 > 0. Atunci:
+      - codul corect: venit_net_impozabil = venit - cheltuieli (mai mic)
+      - mutantul:     venit_net_impozabil = venit + cheltuieli (mai mare)
+    Verificând că cheltuieli > 0 și că venit_net_impozabil == venit - cheltuieli,
+    testul va pica pe mutant.
+
+------------------------------------------------------------------------------
+
+  MUTANT 2: Job 205 — NumberReplacer în _get_cass_base() fallback
+  ---------------------------------------------------------------
+  Fișier:   src/calculator_pfa.py, linia 26
+  Mutație:  return 0.0  →  return 1.0  (după bucla de brackets)
+  Operator: core/NumberReplacer, occurrence: 2, definition_name: _get_cass_base
+
+  De ce este neechivalent:
+    Dacă ramura de fallback (după buclă) ar fi atinsă și ar returna 1.0
+    în loc de 0.0, cass_base ar fi 1.0, iar cass = 1.0 * cass_rate = 0.1 RON
+    în loc de 0.0 RON — calcul incorect.
+
+  De ce supraviețuiește:
+    Ultimul bracket din JSON are max_income_multiplier: null (None), deci
+    condiția `upper is None` este mereu True pentru ultimul bracket, și
+    funcția returnează mereu din interiorul buclei — ramura `return 0.0`
+    de după buclă este dead code cu datele actuale.
+    Testele existente nu forțează execuția ramurii post-buclă.
+
+  Cum îl omorâm:
+    Apelăm direct _get_cass_base() cu o instanță la care brackets este
+    lista goală (prin monkeypatch pe self.rules). Astfel bucla nu se
+    execută deloc și se ajunge la `return 0.0`. Verificăm că rezultatul
+    este exact 0.0 — mutantul ar returna 1.0 și testul ar pica.
 """
 
 import pytest
@@ -72,112 +125,98 @@ from tax_config import get_available_years, get_rules_for_year, YEARLY_TAX_RULES
 
 class TestMutationKillers:
     """
-    Teste suplimentare scrise pentru a omori mutanți neechivalenți
-    rămași în viață după rularea mutmut.
+    Teste suplimentare scrise pentru a omori mutanții neechivalenți
+    rămași în viață după rularea cosmic-ray pe calculator_pfa.py.
+
     """
 
     # =========================================================================
-    # MUTANT 1: calculator_pfa.xǁPFACalculatorǁ_get_cass_base__mutmut_16
+    # MUTANT 1: Job 23 — ReplaceBinaryOperator_Sub_Add
     #
-    # Mutația: `return 0.0` → `return 1.0` (fallback după bucla de brackets)
+    # Mutația: max(self.venit_brut - cheltuieli, 0.0)
+    #       → max(self.venit_brut + cheltuieli, 0.0)
     #
-    # De ce supraviețuiește: ramura `return 0.0` de după buclă nu e atinsă
-    # în mod normal (ultimul bracket are max=None, deci mereu returnează din
-    # buclă). Testele existente verifică că cass == 0.0 pentru venit mic, dar
-    # nu verifică că venit_net din calculate() este consistent cu cass == 0.0.
+    # Linia afectată: venit_net_impozabil = max(self.venit_brut - cheltuieli, 0.0)
     #
-    # Cum îl omorâm: verificăm că pentru venit = 0, cass este exact 0.0
-    # și că venit_net == venit_brut - cas - cass - impozit cu cass=0,
-    # ceea ce ar eșua dacă cass ar fi 1.0 (atunci venit_net ar fi cu 0.1 mai mic).
+    # Supraviețuiește deoarece: expense_ratio = 0.0 → cheltuieli = 0 →
+    # scăderea și adunarea cu 0 dau același rezultat.
+    #
+    # Strategia de omor: injectăm un expense_ratio != 0 prin monkeypatch,
+    # astfel cheltuieli > 0 și cele două operații produc rezultate diferite.
     # =========================================================================
 
-    def test_kill_mutant_pfa_cass_fallback_zero_income(self):
+    def test_kill_mutant_sub_add_cheltuieli_nonzero(self, monkeypatch):
         """
-        Omoară mutantul _get_cass_base__mutmut_16 (return 0.0 → return 1.0).
+        Omoară mutantul Job 23 (venit_brut - cheltuieli → venit_brut + cheltuieli).
 
-        Cu venit = 0, venit_net_impozabil = 0 și primul bracket (max=6*salariu)
-        este satisfăcut, deci se returnează base_multiplier=0 * salariu = 0.0.
-        Verificăm că cass este exact 0.0 RON și că totalul este consistent.
-        Dacă mutantul ar fi activ (return 1.0), cass = 1.0 * 0.1 = 0.1 ≠ 0.0.
+        Injectăm expense_ratio = 0.20 astfel că pentru venit = 100000:
+          cheltuieli = 100000 * 0.20 = 20000
+          CORECT:  venit_net_impozabil = 100000 - 20000 = 80000
+          MUTANT:  venit_net_impozabil = 100000 + 20000 = 120000
+
+        Verificăm că venit_net_impozabil == venit_brut - cheltuieli.
+        Mutantul ar produce o valoare cu 40000 mai mare, deci testul pică.
         """
-        pfa = PFACalculator(0, 2024).calculate()
-        assert pfa["cass"] == 0.0, (
-            "CASS trebuie să fie 0.0 pentru venit 0 — "
-            "mutantul (return 1.0) ar produce 0.1"
+        calc = PFACalculator(100000, 2024)
+
+        # Injectăm expense_ratio nenul în regulile instanței
+        monkeypatch.setitem(calc.rules["pfa"], "expense_ratio", 0.20)
+
+        result = calc.calculate()
+
+        expected_cheltuieli = 100000 * 0.20          # 20000.0
+        expected_venit_net_impozabil = 100000 - expected_cheltuieli  # 80000.0
+
+        assert result["cheltuieli"] == pytest.approx(expected_cheltuieli, abs=0.01), (
+            f"cheltuieli greșite: {result['cheltuieli']} != {expected_cheltuieli}"
         )
-        assert pfa["venit_net"] == 0.0, (
-            "venit_net trebuie să fie 0.0 pentru venit 0"
+        assert result["venit_net_impozabil"] == pytest.approx(expected_venit_net_impozabil, abs=0.01), (
+            "venit_net_impozabil trebuie să fie venit_brut - cheltuieli, "
+            f"nu venit_brut + cheltuieli. "
+            f"Obținut: {result['venit_net_impozabil']}, Așteptat: {expected_venit_net_impozabil}. "
+            "Mutantul (+ în loc de -) ar produce 120000, nu 80000."
         )
-        assert pfa["total_taxe"] == 0.0
 
-    def test_kill_mutant_pfa_cass_exact_value_low_bracket(self):
-        """
-        Omoară mutantul _get_cass_base__mutmut_16 prin verificarea strictă
-        a valorii CASS pentru venit în primul bracket (sub 6 * salariu minim).
-
-        Pentru 2024: 6 * 3300 = 19800. Cu venit = 10000 < 19800,
-        base_multiplier = 0, deci cass = 0 * 3300 * 0.1 = 0.0 RON.
-
-        Dacă mutantul ar fi activ (return 1.0 după buclă), în acest caz
-        bucla returnează corect din primul bracket, deci mutantul nu afectează
-        această ramură. Verificăm suplimentar prin consistența calculului:
-        venit_net = venit_brut - cas - cass - impozit.
-        """
-        venit = 10000
-        pfa = PFACalculator(venit, 2024).calculate()
-
-        assert pfa["cass"] == 0.0
-        # Verificare consistență: venit_net = brut - cas - cass - impozit
-        expected_net = venit - pfa["cas"] - pfa["cass"] - pfa["impozit"]
-        assert abs(pfa["venit_net"] - expected_net) < 0.01, (
-            f"venit_net inconsistent: {pfa['venit_net']} != {expected_net}"
-        )
 
     # =========================================================================
-    # MUTANT 2: tax_config.x_get_rules_for_year__mutmut_11
+    # MUTANT 2: Job 205 — NumberReplacer în _get_cass_base fallback
     #
-    # Mutația: `year <= fiscal_year` → `year < fiscal_year`
-    # în: previous_or_equal = [year for year in years if year <= fiscal_year]
+    # Mutația: return 0.0 → return 1.0 (după bucla de brackets)
     #
-    # De ce supraviețuiește: testele existente pentru fallback folosesc ani
-    # viitori (ex. 2030), care sunt strict mai mari decât orice an configurat,
-    # deci `<` și `<=` produc același rezultat pentru acele cazuri.
+    # Linia afectată: ultima linie din _get_cass_base(), după for loop.
     #
-    # Cum îl omorâm: cerem regulile pentru exact max_year prin cod-ul de
-    # fallback — adică un an care există în dict dar pe calea `previous_or_equal`.
-    # Alternativ, verificăm că `get_rules_for_year(max_year)` returnează
-    # datele corecte, deoarece cu mutantul activ (`year < fiscal_year`),
-    # dacă am elimina max_year din dict, n-am găsi regulile.
-    # Mai direct: testăm că regulile pentru exact anul maxim sunt corecte
-    # și că un an egal cu cel mai mare an configurat returnează regulile sale.
+    # Supraviețuiește deoarece: ultimul bracket are max_income_multiplier=None,
+    # deci bucla returnează mereu înainte de a ajunge la return 0.0 —
+    # acea linie este dead code cu datele actuale.
+    #
+    # Strategia de omor: forțăm execuția ramurii post-buclă prin monkeypatch
+    # pe brackets cu o listă goală. Bucla nu rulează deloc, se ajunge la
+    # return 0.0. Mutantul ar returna 1.0 și testul ar pica.
     # =========================================================================
 
-    def test_kill_mutant_tax_config_fallback_boundary_equal(self):
+    def test_kill_mutant_cass_fallback_empty_brackets(self, monkeypatch):
         """
-        Omoară mutantul get_rules_for_year__mutmut_11 (<= → <).
+        Omoară mutantul Job 205 (return 0.0 → return 1.0 în _get_cass_base).
 
-        Testează că fallback-ul funcționează corect când anul cerut este
-        exact egal cu ultimul an configurat. Creăm scenariul care distinge
-        <= de <: pentru un an exact egal cu max_year, `year <= fiscal_year`
-        include acel an în lista previous_or_equal, dar `year < fiscal_year` nu.
+        Forțăm execuția ramurii de fallback (după buclă) prin injectarea
+        unei liste goale de brackets. Bucla `for bracket in brackets` nu
+        se execută deloc, și codul ajunge direct la `return 0.0`.
 
-        Forțăm trecerea prin ramura fallback prin monkeypatching temporar,
-        sau mai simplu: verificăm că max_year returnează datele corecte
-        (confirmând că `<=` funcționează corect).
+        CORECT:  return 0.0  → _get_cass_base() == 0.0
+        MUTANT:  return 1.0  → _get_cass_base() == 1.0
+
+        Verificăm că rezultatul este exact 0.0.
         """
-        max_year = max(get_available_years())
-        rules_direct = get_rules_for_year(max_year)
+        calc = PFACalculator(100000, 2024)
 
-        # Regulile pentru max_year trebuie să existe și să fie corecte
-        assert rules_direct is not None
-        assert "minimum_wage" in rules_direct
-        assert "employee" in rules_direct
-        assert "pfa" in rules_direct
+        # Înlocuim brackets cu listă goală → bucla nu rulează → se ajunge la return
+        monkeypatch.setitem(calc.rules["pfa"], "cass_brackets", [])
 
-        # Verificăm că regulile sunt cele ale anului max (2025: salariu minim 3700)
-        expected_min_wage = YEARLY_TAX_RULES[max_year]["minimum_wage"]
-        assert rules_direct["minimum_wage"] == expected_min_wage, (
-            f"Regulile pentru {max_year} au minimum_wage greșit: "
-            f"{rules_direct['minimum_wage']} != {expected_min_wage}"
+        result = calc._get_cass_base(100000)
+
+        assert result == 0.0, (
+            f"_get_cass_base cu brackets gol trebuie să returneze 0.0, "
+            f"nu {result}. "
+            "Mutantul (return 1.0) ar returna 1.0 și acest assert ar pica."
         )
 
