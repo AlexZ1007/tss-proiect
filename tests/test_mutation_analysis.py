@@ -111,6 +111,45 @@ Mutanți NEECHIVALENȚI aleși pentru a fi omorâți:
     lista goală (prin monkeypatch pe self.rules). Astfel bucla nu se
     execută deloc și se ajunge la `return 0.0`. Verificăm că rezultatul
     este exact 0.0 — mutantul ar returna 1.0 și testul ar pica.
+
+------------------------------------------------------------------------------
+
+Employee: src/calculator_employee.py (raport: mutation_report_employee.html)
+------------------------------------------------------------------------------
+
+Mutanți echivalenți (jobs 91–101) — rotunjiri:
+---------------------------------------------
+
+  NumberReplacer pe al doilea argument al lui round(..., 2) din dict-ul
+  returnat (venit_brut, cas, cass, impozit, total_taxe, venit_net).
+  Mutațiile schimbă 2 în 1, 3, etc. Pe valorile întregi / cu puține zecimale
+  folosite în teste, round(x, 2) și round(x, 3) (sau 1) coincid — mutanții
+  sunt echivalenți în contextul datelor curente.
+
+Mutant neechivalent ales pentru a fi omorât:
+---------------------------------------------
+
+  MUTANT 3: Job 90 — NumberReplacer pe al doilea 0.0 din max(..., 0.0)
+  --------------------------------------------------------------------
+  Fișier:   src/calculator_employee.py, linia 13
+  Mutație:  baza_impozabila = max(self.venit_brut - cas - cass, 0.0)
+         →  baza_impozabila = max(self.venit_brut - cas - cass, -1.0)
+  Operator: core/NumberReplacer, occurrence: 1, definition_name: calculate
+
+  De ce este neechivalent:
+    Când venit_brut - cas - cass < 0, codul corect plafonează baza la 0.0;
+    mutantul plafonează la -1.0, deci impozitul și venitul net devin greșite.
+
+  De ce supraviețuiește:
+    Cu rate reale din config, cas_rate + cass_rate < 1, deci pentru
+    venit_brut ≥ 0 avem venit_brut - cas - cass ≥ 0; al doilea argument
+    al lui max nu influențează rezultatul.
+
+  Cum îl omorâm:
+    Monkeypatch cas_rate și cass_rate astfel încât cas_rate + cass_rate > 1
+    (ex. 0.6 și 0.5). Pentru venit_brut pozitiv mic, venit_brut - cas - cass < 0;
+    corect: baza_impozabila = 0.0 → impozit = 0.0; mutant: baza = -1.0 →
+    impozit negativ. Assert impozit == 0 omorâște mutantul.
 """
 
 import pytest
@@ -119,14 +158,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from calculator_employee import EmployeeCalculator
 from calculator_pfa import PFACalculator
-from tax_config import get_available_years, get_rules_for_year, YEARLY_TAX_RULES
 
 
+@pytest.mark.mutation_killer
 class TestMutationKillers:
     """
-    Teste suplimentare scrise pentru a omori mutanții neechivalenți
-    rămași în viață după rularea cosmic-ray pe calculator_pfa.py.
+    Teste suplimentare pentru mutanți neechivalenți rămași în viață după
+    cosmic-ray pe `calculator_pfa.py` și `calculator_employee.py`.
 
     """
 
@@ -218,5 +258,42 @@ class TestMutationKillers:
             f"_get_cass_base cu brackets gol trebuie să returneze 0.0, "
             f"nu {result}. "
             "Mutantul (return 1.0) ar returna 1.0 și acest assert ar pica."
+        )
+
+    # =========================================================================
+    # MUTANT 3: Job 90 — NumberReplacer pe al doilea argument al lui max
+    #
+    # Mutația: max(self.venit_brut - cas - cass, 0.0)
+    #       → max(self.venit_brut - cas - cass, -1.0)
+    #
+    # Linia afectată: baza_impozabila = max(self.venit_brut - cas - cass, 0.0)
+    #
+    # Supraviețuiește deoarece: cu rate reale, venit_brut - cas - cass ≥ 0,
+    # deci max returnează mereu primul argument; al doilea literal nu contează.
+    #
+    # Strategia de omor: forțăm venit_brut - cas - cass < 0 prin monkeypatch
+    # pe cas_rate + cass_rate > 1; atunci corect baza = 0, mutant baza = -1.
+    # =========================================================================
+
+    def test_kill_employee_mutant_job_90_max_floor_numberreplacer(self, monkeypatch):
+        """
+        Omoară mutantul Job 90 (al doilea 0.0 din max(..., 0.0) → -1.0).
+
+        Cu cas_rate = 0.6, cass_rate = 0.5 și venit_brut = 10000:
+          cas = 6000, cass = 5000, venit_brut - cas - cass = -1000
+          CORECT:  baza_impozabila = max(-1000, 0.0) = 0.0  → impozit = 0.0
+          MUTANT:  baza_impozabila = max(-1000, -1.0) = -1.0 → impozit = -0.1
+
+        Assert impozit == 0 prinde mutantul; codul corect trece.
+        """
+        calc = EmployeeCalculator(10000, 2024)
+        monkeypatch.setitem(calc.rules["employee"], "cas_rate", 0.6)
+        monkeypatch.setitem(calc.rules["employee"], "cass_rate", 0.5)
+
+        result = calc.calculate()
+
+        assert result["impozit"] == pytest.approx(0.0, abs=0.001), (
+            "Cu baza impozabilă negativă, impozitul trebuie calculat de la 0.0, "
+            f"nu de la -1.0 (mutant Job 90). Obținut: impozit={result['impozit']!r}."
         )
 

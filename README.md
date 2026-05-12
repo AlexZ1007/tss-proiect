@@ -1,6 +1,7 @@
 # TaxVision RO
 
 Theme: T1 - Testare Unitară în Python
+
 Team: Dragomir Miruna, Iștoc Simona, Tanislav Alexia, Zamfir Alexandru
 
 ## Table of Contents
@@ -73,28 +74,33 @@ pytest -v
 ```
 
 ### 4) Mutation testing (cosmic-ray)
-Mutation testing uses [cosmic-ray](https://cosmic-ray.readthedocs.io/) with the configuration in [`cosmic-ray.toml`](cosmic-ray.toml).
+Mutation testing uses [cosmic-ray](https://cosmic-ray.readthedocs.io/). PFA logic is configured in [`cosmic-ray.toml`](cosmic-ray.toml); employee-only runs use [`cosmic-ray-employee.toml`](cosmic-ray-employee.toml). Combined PFA + Employee metrics and survivor analysis are summarized under **Mutation testing** in the [Technical report](#technical-report) below.
 
 ```bash
-# Initialize session - Inițializează sesiunea
+# Initialize session 
 cosmic-ray init cosmic-ray.toml session.sqlite
 
-# Run mutants (may take a few minutes) - Rulează mutanții (poate dura câteva minute)
+# Run mutants (may take a few minutes)
 cosmic-ray exec cosmic-ray.toml session.sqlite
 
-# View results in the terminal - Vezi rezultatele în terminal
+# View results in the terminal 
 cr-report session.sqlite
 
-# Generate HTML report - Generează raport HTML
-# On Windows, force UTF-8 on stdout so characters such as "ă" in captured test output
-# do not trigger UnicodeEncodeError when redirecting to a file (cp1252 cannot encode them).
+# Generate HTML report 
 PYTHONIOENCODING=utf-8 cr-html session.sqlite > mutation_report.html
 ```
 
 The HTML report is written to `mutation_report.html` in the project root. In **cmd.exe**, use `set PYTHONIOENCODING=utf-8 && cr-html session.sqlite > mutation_report.html` instead.
 
 ### 5) Tool versions
-
+| Package (`requirements.txt`) | PyPI / pip name | Version |
+|------------------------------|-----------------|---------|
+| streamlit | streamlit | 1.55.0 |
+| pandas | pandas | 2.3.0 |
+| matplotlib | matplotlib | 3.10.3 |
+| openpyxl | openpyxl | 3.1.5 |
+| pytest | pytest | 9.0.2 |
+| cosmic-ray | cosmic-ray | 8.4.6 |
 
 ## Continuous Integration (CI)
 
@@ -136,31 +142,31 @@ Ensures that every branch of every decision point (e.g., if/else blocks) is exec
 
 **Mutation testing analysis - cosmic-ray report**
 
-Mutant generator: **cosmic-ray**. File under analysis: `src/calculator_pfa.py`.
+Mutant generator: **cosmic-ray**. Scope: **PFA + Employee** business logic (`src/calculator_pfa.py`, `src/calculator_employee.py`). Metrics below **aggregate** two runs: [`cosmic-ray.toml`](cosmic-ray.toml) on PFA (229 jobs) and [`cosmic-ray-employee.toml`](cosmic-ray-employee.toml) on Employee (102 jobs), **331 jobs** total. HTML examples: [`mutation_report_after.html`](mutation_report_after.html) (PFA), [`mutation_report_employee.html`](mutation_report_employee.html) / [`mutation_report_employee_after.html`](mutation_report_employee_after.html) (Employee).
 
 **Configuration**
 
-- Config file: [`cosmic-ray.toml`](cosmic-ray.toml)
-- `module-path`: `src/calculator_pfa.py`
-- `test-command`: `python -X utf8 -m pytest tests/ -x -q` (UTF-8 mode avoids Cosmic Ray decoding errors on Windows)
+- PFA: [`cosmic-ray.toml`](cosmic-ray.toml) — `module-path`: `src/calculator_pfa.py`
+- Employee: [`cosmic-ray-employee.toml`](cosmic-ray-employee.toml) — `module-path`: `src/calculator_employee.py`
+- `test-command` (both): `python -X utf8 -m pytest tests/ -x -q` (UTF-8 mode avoids Cosmic Ray decoding errors on Windows)
 
-**Overall results**
+**Overall results (PFA + Employee combined)**
 
-Before: 
+Before:  
 | Metric | Value |
 |--------|-------|
-| Total mutants generated (jobs) | 229 |
-| Mutants executed to completion | 229 (100%) |
-| Mutants killed | 207 (~90.39%) |
-| Surviving mutants | 22 (~9.61%) |
+| Total mutants generated (jobs) | 331 |
+| Mutants executed to completion | 331 (100%) |
+| Mutants killed | 297 (~89.73%) |
+| Surviving mutants | 34 (~10.27%) |
 
 After:
 | Metric | Value |
 |--------|-------|
-| Total mutants generated (jobs) | 229 |
-| Mutants executed to completion | 229 (100%) |
-| Mutants killed | 210 (~91.70%) |
-| Surviving mutants | 19  (~8.30%) |
+| Total mutants generated (jobs) | 331 |
+| Mutants executed to completion | 331 (100%) |
+| Mutants killed | 301 (~90.94%) |
+| Surviving mutants | 30 (~9.06%) |
 
 **How to read the cosmic-ray HTML report**
 
@@ -182,14 +188,10 @@ After:
 
 **Equivalent mutants (relative to current test data)**
 
-*NumberReplacer occurrence 2–24 (19 survived)*
+Across **both calculators**, the largest share of survivors are **`NumberReplacer`** mutations that stay **observationally equivalent** with the incomes and amounts used in the suite.
 
-These mutants change numeric constants - bracket multipliers (e.g. `6` → `7` in `max_income_multiplier`) and the number of decimal places in `round()` (e.g. `round(cas, 2)` → `round(cas, 3)`).
-
-They survive because:
-
-- Bracket multipliers: tests do not use incomes exactly on bracket boundaries, so nudging a multiplier by ±1 does not change the observable outcome.
-- `round(..., 2)` vs `round(..., 3)`: for the integer-valued amounts used in tests (e.g. `19800.0`, `9900.0`), rounding to two or three decimal places agrees.
+- **PFA (`calculator_pfa.py`):** bracket multipliers (e.g. `6` → `7` in `max_income_multiplier`) and `round(..., 2)` → a different decimal count (e.g. `round(cas, 2)` → `round(cas, 3)`): tests rarely sit exactly on bracket edges, and many test values are whole RON amounts, so nudging a multiplier or the `round` precision often leaves returned floats unchanged (see the PFA report, e.g. a band such as `NumberReplacer` occurrences 2–24 with 19 survivors in the 229-job PFA run).
+- **Employee (`calculator_employee.py`):** in the employee-only report, jobs **91–101** replace the `2` in `round(x, 2)` for each field of the `calculate()` result dict with another small integer; gross and contribution lines in tests behave as whole numbers, so those mutations do not change observable outputs — same “rounding equivalence” idea as on PFA.
 
 **Non-equivalent mutants selected for killing**
 
@@ -208,6 +210,14 @@ They survive because:
    - **Why it is not equivalent:** if that fallback ran with `1.0`, the CASS base would be wrong (e.g. non-zero CASS instead of zero).  
    - **Why it survives:** the last JSON bracket has `max_income_multiplier: null`, so `upper is None` is always true for the last bracket and the function returns inside the loop - the post-loop `return 0.0` is dead code with the current data.  
    - **How to kill it:** call `_get_cass_base()` directly with an empty `brackets` list (e.g. monkeypatch `self.rules`); expect exactly `0.0` - the mutant returns `1.0` and the test fails.
+
+3. **Job 90 (Employee) - `NumberReplacer` on the floor of `max(..., 0.0)` in `calculate()`**  
+   - **File:** `src/calculator_employee.py`, line 13.  
+   - **Mutation:** `baza_impozabila = max(self.venit_brut - cas - cass, 0.0)` → `max(..., -1.0)`.  
+   - **Operator:** `core/NumberReplacer` (second `0.0` literal in that `max`).  
+   - **Why it is not equivalent:** when `venit_brut - cas - cass` is negative, correct code clamps the taxable base to `0.0`; the mutant clamps to `-1.0`, which changes income tax and net pay.  
+   - **Why it survives:** with normal rates (`cas_rate + cass_rate < 1`), that inner expression is never negative for non-negative gross, so the second argument to `max` is unused.  
+   - **How to kill it:** monkeypatch `cas_rate` and `cass_rate` so their sum exceeds `1`, forcing a negative inner value; assert `impozit` stays at zero on correct code — see `test_kill_employee_mutant_job_90_max_floor_numberreplacer` in [`tests/test_mutation_analysis.py`](tests/test_mutation_analysis.py).
 
 ### Tax Rules Configuration Structure (`src/tax_rules.json`)
 The fiscal configuration file is organized by year and contains all rule parameters needed by the calculation layer.
