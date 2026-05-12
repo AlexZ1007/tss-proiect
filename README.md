@@ -97,7 +97,6 @@ The HTML report is written to `mutation_report.html` in the project root. In **c
 |------------------------------|-----------------|---------|
 | streamlit | streamlit | 1.55.0 |
 | pandas | pandas | 2.3.0 |
-| matplotlib | matplotlib | 3.10.3 |
 | openpyxl | openpyxl | 3.1.5 |
 | pytest | pytest | 9.0.2 |
 | cosmic-ray | cosmic-ray | 8.4.6 |
