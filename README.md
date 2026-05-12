@@ -1,5 +1,8 @@
 # TaxVision RO
 
+Theme: T1 - Testare Unitară în Python
+Team: Dragomir Miruna, Iștoc Simona, Tanislav Alexia, Zamfir Alexandru
+
 ## Table of Contents
 - [Purpose of the Application](#purpose-of-the-application)
 - [Project Resources](#project-resources)
@@ -38,7 +41,6 @@ Primary objectives:
 ### Prerequisites
 - Python 3.10 or newer
 - `pip`
-- `WSL` for mutation testing
 - Optional: a Python virtual environment (`venv`)
 
 ### 1) Install dependencies
@@ -70,14 +72,36 @@ Verbose output:
 pytest -v
 ```
 
-### 4) Tool versions
+### 4) Mutation testing (cosmic-ray)
+Mutation testing uses [cosmic-ray](https://cosmic-ray.readthedocs.io/) with the configuration in [`cosmic-ray.toml`](cosmic-ray.toml).
+
+```bash
+# Initialize session - Inițializează sesiunea
+cosmic-ray init cosmic-ray.toml session.sqlite
+
+# Run mutants (may take a few minutes) - Rulează mutanții (poate dura câteva minute)
+cosmic-ray exec cosmic-ray.toml session.sqlite
+
+# View results in the terminal - Vezi rezultatele în terminal
+cr-report session.sqlite
+
+# Generate HTML report - Generează raport HTML
+# On Windows, force UTF-8 on stdout so characters such as "ă" in captured test output
+# do not trigger UnicodeEncodeError when redirecting to a file (cp1252 cannot encode them).
+PYTHONIOENCODING=utf-8 cr-html session.sqlite > mutation_report.html
+```
+
+The HTML report is written to `mutation_report.html` in the project root. In **cmd.exe**, use `set PYTHONIOENCODING=utf-8 && cr-html session.sqlite > mutation_report.html` instead.
+
+### 5) Tool versions
+
 
 ## Continuous Integration (CI)
 
 When this repository is hosted on GitHub, [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs only on **push to `master`** (for example after a pull request is merged). It does not run on other branches or on pull request events alone.
 
 - **What runs:** `pytest` only (the full test suite under `tests/`).
-- **What does not run:** mutation testing (`mutmut`) is **not** executed in CI.
+- **What does not run:** mutation testing (`cosmic-ray`) is **not** executed in CI.
   
 ## Technical Report
 
@@ -110,6 +134,81 @@ Ensures that every branch of every decision point (e.g., if/else blocks) is exec
 #### Statement coverage
 #### Mutation testing
 
+**Mutation testing analysis - cosmic-ray report**
+
+Mutant generator: **cosmic-ray**. File under analysis: `src/calculator_pfa.py`.
+
+**Configuration**
+
+- Config file: [`cosmic-ray.toml`](cosmic-ray.toml)
+- `module-path`: `src/calculator_pfa.py`
+- `test-command`: `python -X utf8 -m pytest tests/ -x -q` (UTF-8 mode avoids Cosmic Ray decoding errors on Windows)
+
+**Overall results**
+
+Before: 
+| Metric | Value |
+|--------|-------|
+| Total mutants generated (jobs) | 229 |
+| Mutants executed to completion | 229 (100%) |
+| Mutants killed | 207 (~90.39%) |
+| Surviving mutants | 22 (~9.61%) |
+
+After:
+| Metric | Value |
+|--------|-------|
+| Total mutants generated (jobs) | 229 |
+| Mutants executed to completion | 229 (100%) |
+| Mutants killed | 210 (~91.70%) |
+| Surviving mutants | 19  (~8.30%) |
+
+**How to read the cosmic-ray HTML report**
+
+- **Green** - mutant killed (tests fail on mutated code - desired).
+- **Red** - mutant survived (tests still pass on mutated code - suite weakness).
+- **Blue** - no coverage (no test reaches that line).
+
+**Example mutation operators**
+
+- `core/NumberReplacer` - replaces numeric literals (e.g. `0.0` → `1.0`, `2` → `3`).
+- `core/ReplaceBinaryOperator_Sub_Add` / `Add_Sub` / `Add_Mul` / `Add_Div` / `Sub_Mul` / `Mul_Pow` / `Mul_BitXor` - replaces arithmetic operators (e.g. `-` with `+`).
+- `core/ReplaceOrWithAnd` - `or` → `and`.
+- `core/AddNot` - inserts `not` (e.g. `if x` → `if not x`).
+- `core/ReplaceComparisonOperator_Is_IsNot`, `ReplaceComparisonOperator_Lt_Is` - replaces comparison operators.
+
+---
+
+**Analysis of surviving mutants**
+
+**Equivalent mutants (relative to current test data)**
+
+*NumberReplacer occurrence 2–24 (19 survived)*
+
+These mutants change numeric constants - bracket multipliers (e.g. `6` → `7` in `max_income_multiplier`) and the number of decimal places in `round()` (e.g. `round(cas, 2)` → `round(cas, 3)`).
+
+They survive because:
+
+- Bracket multipliers: tests do not use incomes exactly on bracket boundaries, so nudging a multiplier by ±1 does not change the observable outcome.
+- `round(..., 2)` vs `round(..., 3)`: for the integer-valued amounts used in tests (e.g. `19800.0`, `9900.0`), rounding to two or three decimal places agrees.
+
+**Non-equivalent mutants selected for killing**
+
+1. **Job 23 - `ReplaceBinaryOperator_Sub_Add` in `calculate()`**  
+   - **File:** `src/calculator_pfa.py`, line 34.  
+   - **Mutation:** `venit_net_impozabil = max(self.venit_brut - cheltuieli, 0.0)` → `venit_net_impozabil = max(self.venit_brut + cheltuieli, 0.0)`.  
+   - **Operator:** `core/ReplaceBinaryOperator_Sub_Add`.  
+   - **Why it is not equivalent:** expenses are added to gross income instead of subtracted - for `expense_ratio > 0`, net taxable income is too high and tax is wrong.  
+   - **Why it survives:** with `expense_ratio = 0.0`, `cheltuieli = 0`, so `venit_brut - 0` and `venit_brut + 0` coincide; tests do not cover `expense_ratio != 0`.  
+   - **How to kill it:** monkeypatch `expense_ratio` (e.g. `0.2`) so `cheltuieli > 0`; assert `venit_net_impozabil == venit - cheltuieli` - the mutant fails.
+
+2. **Job 205 - `NumberReplacer` in `_get_cass_base()` (post-loop fallback)**  
+   - **File:** `src/calculator_pfa.py`, line 26.  
+   - **Mutation:** `return 0.0` → `return 1.0` after the bracket loop.  
+   - **Operator:** `core/NumberReplacer` (occurrence 2, `definition_name: _get_cass_base`).  
+   - **Why it is not equivalent:** if that fallback ran with `1.0`, the CASS base would be wrong (e.g. non-zero CASS instead of zero).  
+   - **Why it survives:** the last JSON bracket has `max_income_multiplier: null`, so `upper is None` is always true for the last bracket and the function returns inside the loop - the post-loop `return 0.0` is dead code with the current data.  
+   - **How to kill it:** call `_get_cass_base()` directly with an empty `brackets` list (e.g. monkeypatch `self.rules`); expect exactly `0.0` - the mutant returns `1.0` and the test fails.
+
 ### Tax Rules Configuration Structure (`src/tax_rules.json`)
 The fiscal configuration file is organized by year and contains all rule parameters needed by the calculation layer.
 
@@ -141,7 +240,7 @@ Bracket semantics:
 ### Environment and Execution
 We ran everything directly on Windows (no virtual machine).
 - Regular test execution was done on Windows.
-- Mutation testing with `mutmut` was run through WSL.
+- Mutation testing with cosmic-ray was run through WSL.
 
 ### Technologies
 
@@ -184,7 +283,7 @@ Local development, testing strategies, and GitHub flow through Actions on `maste
 |------|------|
 | **Google Gemini** | Early brainstorming about the application idea and how to apply testing strategies. |
 | **Gemini and Cursor** | Drafting and refining automated tests (`pytest`), including structure, assertions, and edge cases aligned with `src/` calculators and `src/tax_rules.json`. |
-| **Cursor (feedback loop)** | After a full test module was written, we used the chat to cross-check coverage—for example, by walking through `TestEquivalencePartitioning` in `tests/test_equivalence_partitioning.py` to confirm invalid/valid partitions for `venit_brut` and `anul_fiscal` were represented and that both `EmployeeCalculator` and `PFACalculator` stayed in sync. |
+| **Cursor (feedback loop)** | After a full test module was written, we used the chat to cross-check coverage-for example, by walking through `TestEquivalencePartitioning` in `tests/test_equivalence_partitioning.py` to confirm invalid/valid partitions for `venit_brut` and `anul_fiscal` were represented and that both `EmployeeCalculator` and `PFACalculator` stayed in sync. |
 | **Cursor** | Building and iterating the Streamlit UI in `src/app.py` (layout, inputs, comparison flow, exports) while keeping business logic in calculators and tests separate from presentation. |
 
 ### Workflow example
@@ -227,9 +326,9 @@ In **`tests/test_boundary_values.py`** we first wrote **employee** boundary case
 
 - **Prompt:** In `tests/test_equivalence_partitioning.py`, list every equivalence class we claim in the docstring and show which test method covers it for employee vs PFA. Flag gaps.
 
-**Mutation testing with mutmut (Cursor / Gemini)**
+**Mutation testing with cosmic-ray (Cursor / Gemini)**
 
-- **Prompt:** “We run mutation testing with mutmut on the calculator code under `src/`. Walk through how to install and run it (`mutmut run`, then `mutmut results` / `mutmut show <id>` if needed). Then break down the report: how many mutants, killed vs survived vs no tests, what those buckets mean for our repo, a few interesting survivors, and which look equivalent vs worth a new test.”
+- **Prompt:** “We run mutation testing with cosmic-ray on the calculator code under `src/`. Walk through how to install and run it (`cosmic-ray init` / `cosmic-ray exec`, then `cr-report` / `cr-html` if needed). Then break down the report: how many mutants, killed vs survived vs no coverage, what those buckets mean for our repo, a few interesting survivors, and which look equivalent vs worth a new test.”
 
 ### Limitations and how we used AI safely
 
