@@ -35,7 +35,7 @@ Primary objectives:
 - Presentation file: `TBD`
 
 ### Demo
-- Application demo video: [`demo/demo.mp4`](demo/demo.mp4)
+- Application demo video: [`demo/demo.mp4`](demo/demo.mp4) (repository file) · [https://youtu.be/Z5GPYjhroMY](https://youtu.be/Z5GPYjhroMY)
 - Test execution results: [`demo/test_results.png`](demo/test_results.png)
 
 ## Project Setup
