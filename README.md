@@ -1,22 +1,43 @@
 # TaxVision RO
 
 ## Table of Contents
-- [Purpose of the Application](#purpose-of-the-application)
-- [Project Resources](#project-resources)
-- [Project Setup](#project-setup)
-- [Continuous Integration (CI)](#continuous-integration-ci)
-- [Technical Report](#technical-report)
-  - [Testing Scope](#testing-scope)
-  - [Testing Strategies](#testing-strategies)
-  - [Tax Rules Configuration Structure (`src/tax_rules.json`)](#tax-rules-configuration-structure-srctax_rulesjson)
-  - [Environment and Execution](#environment-and-execution)
-  - [Technologies](#technologies)
-    - [Streamlit vs Django](#streamlit-vs-django)
-    - [Pytest vs Unittest](#pytest-vs-unittest)
-- [Diagrams](#diagrams)
-  - [Use case](#use-case-application-flow)
-  - [Pipeline](#development-and-testing-pipeline)
-- [AI-Assisted Testing Report](#ai-assisted-testing-report)
+- [TaxVision RO](#taxvision-ro)
+  - [Table of Contents](#table-of-contents)
+  - [Purpose of the Application](#purpose-of-the-application)
+  - [Project Resources](#project-resources)
+    - [Presentation](#presentation)
+    - [Demo](#demo)
+  - [Project Setup](#project-setup)
+    - [Prerequisites](#prerequisites)
+    - [1) Install dependencies](#1-install-dependencies)
+    - [2) Run the application (Streamlit)](#2-run-the-application-streamlit)
+    - [3) Run tests (pytest)](#3-run-tests-pytest)
+    - [4) Tool versions](#4-tool-versions)
+  - [Continuous Integration (CI)](#continuous-integration-ci)
+  - [Technical Report](#technical-report)
+    - [Testing Scope](#testing-scope)
+    - [Testing Strategies](#testing-strategies)
+      - [Basis path](#basis-path)
+      - [Boundary value](#boundary-value)
+      - [Condition coverage](#condition-coverage)
+      - [Decision coverage](#decision-coverage)
+      - [Equivalence partitioning](#equivalence-partitioning)
+      - [Statement coverage](#statement-coverage)
+      - [Mutation testing](#mutation-testing)
+    - [Tax Rules Configuration Structure (`src/tax_rules.json`)](#tax-rules-configuration-structure-srctax_rulesjson)
+    - [Environment and Execution](#environment-and-execution)
+    - [Technologies](#technologies)
+      - [Streamlit vs Django](#streamlit-vs-django)
+      - [Pytest vs Unittest](#pytest-vs-unittest)
+  - [Diagrams](#diagrams)
+    - [Use case (application flow)](#use-case-application-flow)
+    - [Development and testing pipeline](#development-and-testing-pipeline)
+  - [AI-Assisted Testing Report](#ai-assisted-testing-report)
+    - [Tools and roles](#tools-and-roles)
+    - [Workflow example](#workflow-example)
+    - [Example of prompts used](#example-of-prompts-used)
+    - [Limitations and how we used AI safely](#limitations-and-how-we-used-ai-safely)
+    - [Summary](#summary)
 
 ## Purpose of the Application
 TaxVision RO helps users analyze Romanian income tax outcomes through a clear comparison workflow and practical decision support.
@@ -102,12 +123,15 @@ Tests all linearly independent paths through the control flow graph, ensuring ev
 - [CFG: Initialization Validation](diagrams/cfg_init_validation_base_test.png)
 - [CFG: Project Basis Path](diagrams/cfg_PFACalculator.png)
 #### Boundary value
+Focuses on values at the edges of input domains and transitions between equivalence classes. This technique tests the exact boundary values where the system behavior can change, such as just below, exactly at, and just above thresholds used by tax rules and contribution brackets.
 #### Condition coverage
 Validates that each individual condition in compound boolean expressions evaluates to both True and False independently.
 #### Decision coverage
 Ensures that every branch of every decision point (e.g., if/else blocks) is executed at least once.
 #### Equivalence partitioning
+Divides the input domain into classes of equivalent behavior and tests representative values from each class. This reduces redundant tests while ensuring that both valid and invalid partitions for `venit_brut` and `anul_fiscal` are covered.
 #### Statement coverage
+Measures whether each executable statement in the code has been executed by the test suite at least once. It is used here to confirm that the main tax calculation paths and configuration lookups are actually exercised by tests.
 #### Mutation testing
 
 ### Tax Rules Configuration Structure (`src/tax_rules.json`)
