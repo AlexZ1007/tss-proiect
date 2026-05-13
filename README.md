@@ -1,7 +1,5 @@
 # TaxVision RO
 
-
-
 ## Purpose of the Application
 TaxVision RO helps users analyze Romanian income tax outcomes through a clear comparison workflow and practical decision support.
 
