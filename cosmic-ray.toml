@@ -1,0 +1,12 @@
+[cosmic-ray]
+module-path = ["src/calculator_pfa.py"]
+python-version = ""
+timeout = 10.0
+excluded-modules = []
+# Use UTF-8 mode so pytest tracebacks (paths, etc.) decode as UTF-8 on Windows.
+# Cosmic Ray decodes subprocess output strictly as UTF-8; without this, CP1252
+# bytes can raise UnicodeDecodeError and mark jobs INCOMPETENT.
+test-command = "python -X utf8 -m pytest tests/ -x -q"
+
+[cosmic-ray.distributor]
+name = "local"

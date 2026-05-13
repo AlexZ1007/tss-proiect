@@ -11,6 +11,7 @@ from app_helpers import (
     run_simulation as run_simulation_action,
     save_simulation as save_simulation_action,
 )
+from excel_format import format_comparison_worksheet, prepare_export_dataframe_for_excel
 from tax_config import get_available_years
 
 
@@ -118,8 +119,10 @@ st.download_button(
 )
 
 xlsx_buffer = BytesIO()
+export_df_excel = prepare_export_dataframe_for_excel(export_df)
 with pd.ExcelWriter(xlsx_buffer, engine="openpyxl") as writer:
-    export_df.to_excel(writer, sheet_name="Comparison", index=False)
+    export_df_excel.to_excel(writer, sheet_name="Comparison", index=False)
+    format_comparison_worksheet(writer.sheets["Comparison"])
 xlsx_buffer.seek(0)
 
 st.download_button(
