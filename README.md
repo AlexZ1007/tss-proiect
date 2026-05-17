@@ -140,6 +140,9 @@ Ensures that every branch of every decision point (e.g., if/else blocks) is exec
 Divides the input domain into classes of equivalent behavior and tests representative values from each class. This reduces redundant tests while ensuring that both valid and invalid partitions for `venit_brut` and `anul_fiscal` are covered.
 #### Statement coverage
 Measures whether each executable statement in the code has been executed by the test suite at least once. It is used here to confirm that the main tax calculation paths and configuration lookups are actually exercised by tests.
+
+Coverage HTML report for `src/calculator_pfa.py` and `src/calculator_employee.py`: [`htmlcov/index.html`](htmlcov/index.html).
+
 #### Mutation testing
 
 **Mutation testing analysis - cosmic-ray report**
