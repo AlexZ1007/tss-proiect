@@ -21,6 +21,7 @@ Team (18): Dragomir Miruna, Iștoc Simona, Tanislav Alexia, Zamfir Alexandru
   - [Use case](#use-case-application-flow)
   - [Pipeline](#development-and-testing-pipeline)
 - [AI-Assisted Testing Report](#ai-assisted-testing-report)
+- [Bibliography](#bibliography)
 
 ## Purpose of the Application
 TaxVision RO helps users analyze Romanian income tax outcomes through a clear comparison workflow and practical decision support.
@@ -353,3 +354,10 @@ In **`tests/test_boundary_values.py`** we first wrote **employee** boundary case
 ### Summary
 
 Gemini helped frame the problem and test matrix; Gemini and Cursor accelerated writing and extending suites such as **`tests/test_boundary_values.py`** and **`tests/test_equivalence_partitioning.py`**; Cursor closed the loop on coverage and delivered the Streamlit front end.
+
+## Bibliography
+
+- [Streamlit](https://docs.streamlit.io/)
+- [pytest](https://docs.pytest.org/)
+- [Coverage.py](https://coverage.readthedocs.io/)
+- [Cosmic Ray](https://cosmic-ray.readthedocs.io/)
