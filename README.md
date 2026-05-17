@@ -2,7 +2,7 @@
 
 Theme: T1 - Testare Unitară în Python
 
-Team: Dragomir Miruna, Iștoc Simona, Tanislav Alexia, Zamfir Alexandru
+Team (18): Dragomir Miruna, Iștoc Simona, Tanislav Alexia, Zamfir Alexandru
 
 ## Table of Contents
 - [Purpose of the Application](#purpose-of-the-application)
