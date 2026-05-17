@@ -32,7 +32,7 @@ Primary objectives:
 
 ## Project Resources
 ### Presentation
-- Presentation file: `TBD`
+- Presentation file: [`demo/presentation.pdf`](demo/presentation.pdf) (repository file) · [Canva design](https://www.canva.com/design/DAHJYUPBviA/Xnno8TYtvOPjwEWKrLb4UA/edit)
 
 ### Demo
 - Application demo video: [`demo/demo.mp4`](demo/demo.mp4) (repository file) · [https://youtu.be/Z5GPYjhroMY](https://youtu.be/Z5GPYjhroMY)
