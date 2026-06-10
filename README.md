@@ -41,12 +41,12 @@ Primary objectives:
 
 ### Presentation
 
-- Presentation file: `[demo/presentation.pdf](demo/presentation.pdf)` (repository file) · [Canva design](https://www.canva.com/design/DAHJYUPBviA/Xnno8TYtvOPjwEWKrLb4UA/edit)
+- Presentation file: [`demo/presentation.pdf`](demo/presentation.pdf) (repository file) · [Canva design](https://www.canva.com/design/DAHJYUPBviA/Xnno8TYtvOPjwEWKrLb4UA/edit)
 
 ### Demo
 
-- Application demo video: `[demo/demo.mp4](demo/demo.mp4)` (repository file) · [https://youtu.be/Z5GPYjhroMY](https://youtu.be/Z5GPYjhroMY)
-- Test execution results: `[demo/test_results.png](demo/test_results.png)`
+- Application demo video: [`demo/demo.mp4`](demo/demo.mp4) (repository file) · [https://youtu.be/Z5GPYjhroMY](https://youtu.be/Z5GPYjhroMY)
+- Test execution results: [`demo/test_results.png`](demo/test_results.png)
 
 ## Project Setup
 
@@ -129,7 +129,7 @@ Combined PFA + Employee metrics are summarized under **Mutation testing** in the
 
 ## Continuous Integration (CI)
 
-When this repository is hosted on GitHub, `[.github/workflows/ci.yml](.github/workflows/ci.yml)` runs only on **push to `master`** (for example after a pull request is merged). It does not run on other branches or on pull request events alone. The workflow follows GitHub Actions conventions [[7]](#bibliography).
+When this repository is hosted on GitHub, [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs only on **push to `master`** (for example after a pull request is merged). It does not run on other branches or on pull request events alone. The workflow follows GitHub Actions conventions [[7]](#bibliography).
 
 - **What runs:** `pytest` only (the full test suite under `tests/`).
 - **What does not run:** mutation testing (`cosmic-ray`) is **not** executed in CI.
@@ -155,11 +155,11 @@ The implemented testing strategies are covered through dedicated test modules. E
 
 #### Basis path
 
-Tests all linearly independent paths through the control flow graph, ensuring every unique execution sequence is covered. Paths were identified by mapping the source code logic into CFGs and ensuring each test case introduces at least one new edge. The core calculation logic (`_get_cas_base`) has a Cyclomatic Complexity of **V(G) = 3** because it contains 2 decision nodes (*V(G) = P + 1*), requiring exactly 3 independent paths for complete coverage. Tests live in `[tests/test_basis_path.py](tests/test_basis_path.py)`.
+Tests all linearly independent paths through the control flow graph, ensuring every unique execution sequence is covered. Paths were identified by mapping the source code logic into CFGs and ensuring each test case introduces at least one new edge. The core calculation logic (`_get_cas_base`) has a Cyclomatic Complexity of **V(G) = 3** because it contains 2 decision nodes (*V(G) = P + 1*), requiring exactly 3 independent paths for complete coverage. Tests live in [`tests/test_basis_path.py`](tests/test_basis_path.py).
 
 **Control Flow Graph- `PFACalculator._get_cas_base`**
 
-
+![Control Flow Graph](diagrams/cfg_cas_base_test.png)
 
 Source reference:
 
@@ -191,7 +191,7 @@ Source reference:
 
 There are no loops in this function; control flows sequentially through at most two decisions.
 
-`[tests/test_basis_path.py](tests/test_basis_path.py)` covers each CFG branch of `_get_cas_base`:
+[`tests/test_basis_path.py`](tests/test_basis_path.py) covers each CFG branch of `_get_cas_base`:
 
 
 | CFG branch                                                                                   | Test method                               |
@@ -234,11 +234,9 @@ pytest tests/test_decision_coverage.py \
   --cov-report=html:htmlcov
 ```
 
-The terminal output lists `Branch` and `BrPart` columns; open `htmlcov/index.html` for the HTML report.
-
 #### Equivalence partitioning
 
-Divides the input domain into classes of equivalent behavior and tests representative values from each class. This reduces redundant tests while ensuring that both valid and invalid partitions for `venit_brut` and `anul_fiscal` are covered. All cases below are in `[tests/test_equivalence_partitioning.py](tests/test_equivalence_partitioning.py)`.
+Divides the input domain into classes of equivalent behavior and tests representative values from each class. This reduces redundant tests while ensuring that both valid and invalid partitions for `venit_brut` and `anul_fiscal` are covered. All cases below are in [`tests/test_equivalence_partitioning.py`](tests/test_equivalence_partitioning.py).
 
 
 | Input         | Invalid classes                                                                          | Valid classes                                                                                                                    |
@@ -247,7 +245,7 @@ Divides the input domain into classes of equivalent behavior and tests represent
 | `anul_fiscal` | Non-integer strings; integer strictly before `min(get_available_years())` → `ValueError` | Exact configured years; future years → fallback to latest rules                                                                  |
 
 
-**PFA-specific classes (2024).** With `expense_ratio = 0.0`, taxable income equals `venit_brut`. CAS uses strict `<` at `12 × 3300` and `24 × 3300`; CASS brackets use `<=` at `6×`, `12×`, `24×`, and `60×` minimum wage (see `[src/tax_rules.json](src/tax_rules.json)`).
+**PFA-specific classes (2024).** With `expense_ratio = 0.0`, taxable income equals `venit_brut`. CAS uses strict `<` at `12 × 3300` and `24 × 3300`; CASS brackets use `<=` at `6×`, `12×`, `24×`, and `60×` minimum wage (see [`src/tax_rules.json`](src/tax_rules.json)).
 
 
 | Class                      | Representative (`venit_brut`) | Test method                         | Expected `cas` / `cass` |
@@ -260,7 +258,7 @@ Divides the input domain into classes of equivalent behavior and tests represent
 
 #### Boundary value analysis
 
-Focuses on values at the edges of input domains and transitions between equivalence classes. We test values just below, exactly at, and just above thresholds where tax behavior can change. Tests live in `[tests/test_boundary_values.py](tests/test_boundary_values.py)`.
+Focuses on values at the edges of input domains and transitions between equivalence classes. We test values just below, exactly at, and just above thresholds where tax behavior can change. Tests live in [`tests/test_boundary_values.py`](tests/test_boundary_values.py).
 
 **Boundaries covered:**
 
@@ -304,8 +302,6 @@ pytest tests/test_statement_coverage.py \
   --cov-report=term-missing \
   --cov-report=html:htmlcov
 ```
-
-Example report: [`htmlcov/index.html`](htmlcov/index.html) (Coverage.py [[3]](#bibliography), via `pytest-cov`).
 
 #### Mutation testing
 
@@ -392,11 +388,15 @@ Across **both calculators**, the largest share of survivors are `**NumberReplace
   - **Why it survives:** with normal rates (`cas_rate + cass_rate < 1`), that inner expression is never negative for non-negative gross, so the second argument to `max` is unused.  
   - **How to kill it:** monkeypatch `cas_rate` and `cass_rate` so their sum exceeds `1`, forcing a negative inner value; assert `impozit` stays at zero on correct code — see `test_kill_employee_mutant_job_90_max_floor_numberreplacer` in [`tests/test_mutation_analysis.py`](tests/test_mutation_analysis.py).
 
-**Example: killing a mutant (Job 90).** With `test_kill_employee_mutant_job_90_max_floor_numberreplacer` removed from the suite, cosmic-ray marks Job 90 as **survived** (`max(..., 0.0)` → `max(..., -1.0)` on `calculator_employee.py` line 13). Adding the test back forces a negative taxable base via monkeypatched rates; the assert on `impozit` fails on the mutant and cosmic-ray reports **killed**:
+**Example: killing a mutant (Job 90).** With `test_kill_employee_mutant_job_90_max_floor_numberreplacer` removed from the suite, cosmic-ray marks Job 90 as **survived** (`max(..., 0.0)` → `max(..., -1.0)` on `calculator_employee.py` line 13). Adding the test back forces a negative taxable base via monkeypatched rates; the assert on `impozit` fails on the mutant and cosmic-ray reports **killed**.
 
-| Before (test removed) | After (`test_kill_employee_mutant_job_90_max_floor_numberreplacer` active) |
-|-----------------------|---------------------------------------------------------------------------|
-| ![Mutant survived](images/test_mutant_before.png) | ![Mutant killed](images/test_mutant_after.png) |
+*Before (test removed):*
+
+![Mutant survived](images/test_mutant_before.png)
+
+*After (`test_kill_employee_mutant_job_90_max_floor_numberreplacer` active):*
+
+![Mutant killed](images/test_mutant_after.png)
 
 ### Tax Rules Configuration Structure (`src/tax_rules.json`)
 
@@ -490,19 +490,19 @@ AI-assisted prompts cited in this section are recorded in the [Bibliography](#bi
 
 ### Workflow example
 
-In `[tests/test_boundary_values.py](tests/test_boundary_values.py)`, the **employee** boundary cases were written by hand. The matching `**PFACalculator` calls and assertions were generated by Cursor** [[6]](#bibliography) from the prompt below, then reviewed and kept only after `pytest` passed. See **Boundary value extension** under [Example of prompts used](#example-of-prompts-used).
+In [`tests/test_boundary_values.py`](tests/test_boundary_values.py), the **employee** boundary cases were written by hand. The matching `**PFACalculator` calls and assertions were generated by Cursor** [[6]](#bibliography) from the prompt below, then reviewed and kept only after `pytest` passed. See **Boundary value extension** under [Example of prompts used](#example-of-prompts-used).
 
 ### Example of prompts used
 
 **Boundary value extension (Cursor)** [[6]](#bibliography)
 
-Context: existing employee-only methods in `[tests/test_boundary_values.py](tests/test_boundary_values.py)`, plus `[src/calculator_pfa.py](src/calculator_pfa.py)` and `[src/tax_rules.json](src/tax_rules.json)`.
+Context: existing employee-only methods in [`tests/test_boundary_values.py`](tests/test_boundary_values.py), plus [`src/calculator_pfa.py`](src/calculator_pfa.py) and [`src/tax_rules.json`](src/tax_rules.json).
 
 **Prompt:**
 
 > Here is `test_venit_brut_boundary_zero` for `EmployeeCalculator` only. Add matching `PFACalculator` calls and assertions in the same test, same year, without changing pytest style.
 
-**Generated code.** Cursor generated the `PFACalculator` calls and assertions added to the employee tests (example below). The PFA portions of `[tests/test_boundary_values.py](tests/test_boundary_values.py)` are **AI-generated**; we verified them against `tax_rules.json` and kept them only after `pytest` passed.
+**Generated code.** Cursor generated the `PFACalculator` calls and assertions added to the employee tests (example below). The PFA portions of [`tests/test_boundary_values.py`](tests/test_boundary_values.py) are **AI-generated**; we verified them against `tax_rules.json` and kept them only after `pytest` passed.
 
 ```19:40:tests/test_boundary_values.py
     def test_venit_brut_boundary_negative(self):
@@ -531,7 +531,7 @@ Context: existing employee-only methods in `[tests/test_boundary_values.py](test
 
 **Equivalence class extraction (Gemini)** [[5]](#bibliography)
 
-Context supplied to the model: only `[src/tax_rules.json](src/tax_rules.json)`, `[src/calculator_pfa.py](src/calculator_pfa.py)`, and `[src/calculator_employee.py](src/calculator_employee.py)`. The base class (`calculator_base.py`) and year lookup (`tax_config.py`) were **not** included.
+Context supplied to the model: only [`src/tax_rules.json`](src/tax_rules.json), [`src/calculator_pfa.py`](src/calculator_pfa.py), and [`src/calculator_employee.py`](src/calculator_employee.py). The base class (`calculator_base.py`) and year lookup (`tax_config.py`) were **not** included.
 
 **Prompt:**
 
@@ -554,7 +554,7 @@ Context supplied to the model: only `[src/tax_rules.json](src/tax_rules.json)`, 
 
 **AI output (summary).** Gemini produced a large matrix (30+ `venit_brut` rows and 12 `anul_fiscal` rows) with per-year PFA threshold boundaries, rounding-sensitive floats, and NaN/inf cases. Because `TaxCalculator` was missing from context, the model stated that negatives were “mechanically processed” with no visible rejection, and that unsupported **future** years had no fallback- both contradictions once the full codebase is considered.
 
-**Comparison: AI matrix vs `[tests/test_equivalence_partitioning.py](tests/test_equivalence_partitioning.py)`**
+**Comparison: AI matrix vs [`tests/test_equivalence_partitioning.py`](tests/test_equivalence_partitioning.py)**
 
 
 | Topic                             | AI equivalence class (simplified)                               | Covered in test suite                                                     | Notes                                                                 |
