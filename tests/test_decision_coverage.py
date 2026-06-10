@@ -76,6 +76,13 @@ class TestDecisionCoverage:
         # Bracket 5: > 60 * 3300 (upper is None)
         assert PFACalculator(0, 2024)._get_cass_base(300000) == 60 * min_wage
 
+    def test_pfa_cass_base_empty_brackets_fallback(self, monkeypatch):
+        """Loop completes without a match → return 0.0 (calculator_pfa.py post-loop branch)."""
+        calc = PFACalculator(100_000, 2024)
+        monkeypatch.setitem(calc.rules["pfa"], "cass_brackets", [])
+
+        assert calc._get_cass_base(100_000) == 0.0
+
     # Branches in get_rules_for_year (tax_config.py)
 
     def test_get_rules_for_year_branches(self):
@@ -100,6 +107,13 @@ class TestDecisionCoverage:
         # Branch 3: No previous year (too early)
         with pytest.raises(ValueError, match="Minimum configured year is"):
             get_rules_for_year(min_year - 1)
+
+    def test_get_rules_for_year_no_years_configured(self, monkeypatch):
+        """Empty year list → ValueError (tax_config.py: if not years)."""
+        monkeypatch.setattr("tax_config.get_available_years", lambda: [])
+
+        with pytest.raises(ValueError, match="No fiscal rules configured."):
+            get_rules_for_year(2024)
 
     # Branches for max(..., 0.0) in calculate methods 
 

@@ -6,7 +6,7 @@ Generatorul de mutanți folosit: cosmic-ray
 Fișiere analizate: src/calculator_pfa.py
 
 Configurare cosmic-ray:
-  - Fișier configurare: cosmic-ray.toml
+  - Fișier configurare: mutation-testing/cosmic-ray.toml
   - module-path: src/calculator_pfa.py
   - test-command: python -m pytest tests/ -x -q
 
@@ -114,7 +114,7 @@ Mutanți NEECHIVALENȚI aleși pentru a fi omorâți:
 
 ------------------------------------------------------------------------------
 
-Employee: src/calculator_employee.py (raport: mutation_report_employee.html)
+Employee: src/calculator_employee.py (raport: mutation-testing/mutation_report_employee.html)
 ------------------------------------------------------------------------------
 
 Mutanți echivalenți (jobs 91–101) — rotunjiri:

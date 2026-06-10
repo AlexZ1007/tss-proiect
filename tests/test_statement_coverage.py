@@ -136,6 +136,13 @@ class TestStatementCoverage:
         expected_cass = 60 * 3300 * 0.1
         assert result["cass"] == expected_cass
 
+    def test_pfa_get_cass_base_empty_brackets_fallback(self, monkeypatch):
+        """Cover post-loop return 0.0 in _get_cass_base when no bracket matches"""
+        calc = PFACalculator(100_000, 2024)
+        monkeypatch.setitem(calc.rules["pfa"], "cass_brackets", [])
+
+        assert calc._get_cass_base(100_000) == 0.0
+
     # Coverage for tax_config.py
     def test_load_rules_from_json(self):
         """Cover JSON loading"""
@@ -165,6 +172,13 @@ class TestStatementCoverage:
         """Cover early year error"""
         with pytest.raises(ValueError, match="Minimum configured year"):
             get_rules_for_year(2020)
+
+    def test_get_rules_for_year_no_years_configured(self, monkeypatch):
+        """Cover if not years: raise in get_rules_for_year"""
+        monkeypatch.setattr("tax_config.get_available_years", lambda: [])
+
+        with pytest.raises(ValueError, match="No fiscal rules configured."):
+            get_rules_for_year(2024)
 
     # Additional coverage for edge cases
     def test_pfa_with_expense_ratio(self):

@@ -49,7 +49,7 @@
         <mxCell id="KLSsFhC8v1W0kvM3Kor4-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
           <mxGeometry height="80" width="210" x="280" y="340" as="geometry" />
         </mxCell>
-        <mxCell id="KLSsFhC8v1W0kvM3Kor4-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;WSL (local only)&lt;/b&gt;" vertex="1">
+        <mxCell id="KLSsFhC8v1W0kvM3Kor4-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;Windows (local only)&lt;/b&gt;" vertex="1">
           <mxGeometry height="30" width="105" x="332.5" y="340" as="geometry" />
         </mxCell>
         <mxCell id="KLSsFhC8v1W0kvM3Kor4-18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;Cosmic-Ray&lt;/b&gt;" vertex="1">
